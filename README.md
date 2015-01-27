@@ -35,7 +35,7 @@ http://127.0.0.1:8009/sleep                          // remotely sleep this comp
 http://127.0.0.1:8009/wol/c4:d9:87:7a:78:35          // sends a wake-on-lan magic packet on the network to the provided mac address
 </pre>
 
-## configuration
+## Configuration
 
 An optional configuration file may be used.
 
