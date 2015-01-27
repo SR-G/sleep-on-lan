@@ -125,6 +125,10 @@ Example of configuration under OpenHab.
 
 This is a very standard configuration : MAC addresses have just to be reversed.
 
-<pre>
+<pre>Switch  Network_WoL_Solaris   				"Wake PC (solaris)"   					<wake>			(WoL, Status, Network)   { wol="192.168.8.255#14:da:e9:01:98:19" }
+Switch  Network_WoL_Jupiter   				"Wake PC (jupiter)"   					<wake>			(WoL, Status, Network)   { wol="192.168.8.255#bc:5f:f4:2b:df:26" }
+Switch  Network_WoL_Laptop   				"Wake PC (laptop)"   					<wake>			(WoL, Status, Network)   { wol="192.168.8.255#C4:D9:87:7A:78:35" }
 
+Switch  Network_SoL_Solaris   				"Sleep PC (solaris)"   					<sleep>			(WoL, Status, Network)   { wol="192.168.8.255#19:98:01:e9:da:14" }
+Switch  Network_SoL_Laptop   				"Sleep PC (laptop)"   					<sleep>			(WoL, Status, Network)   { wol="192.168.8.255#35:78:7A:87:D9:C4" }
 </pre>
