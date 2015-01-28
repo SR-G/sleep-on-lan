@@ -14,7 +14,7 @@ Written in GO, the code may run on linux and windows platforms.
 
 ## Usage
 
-Grab the windows or linux release : 
+Grab the windows + linux release : https://github.com/SR-G/sleep-on-lan/releases/download/1.0.0-SNAPSHOT/SleepOnLAN-1.0.0-SNAPSHOT.zip
 
 ### Sleep through UDP
 
