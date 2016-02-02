@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"net"
 	"strconv"
 	"strings"
@@ -35,10 +34,14 @@ func ListenUDP(port int) {
 }
 
 func matchAddress(receivedAddress net.HardwareAddr) bool {
-	for _, inter := range GetInterfaces() {
-		if bytes.Equal(receivedAddress, inter.HardwareAddr) {
+	receivedAddressAsString := receivedAddress.String()
+	for _, value := range LocalNetworkMap() {
+		if strings.HasPrefix(value, receivedAddressAsString) {
 			return true
 		}
+		/*if bytes.Equal(receivedAddress, inter.HardwareAddr) {
+			return true
+		}*/
 	}
 
 	return false
@@ -69,5 +72,10 @@ func leftPad2Len(s string, padStr string, overallLen int) string {
 }
 
 func doAction() {
-	Sleep()
+	for _, Command := range configuration.Commands {
+		if Command.IsDefault {
+			ExecuteCommand(Command)
+			break
+		}
+	}
 }

@@ -1,18 +1,28 @@
 package main
 
 import (
-	// "fmt"
-	// "unsafe"
 	"syscall"
 )
 
-func Sleep() {
-	sleepDLLImplementation()
-	// sleepCommandLineImplementation()
+func RegisterDefaultCommand() {
+	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: "internal-dll", IsDefault: true}
+	configuration.Commands = []CommandConfiguration{defaultCommand}
 }
 
-func sleepCommandLineImplementation() {
-	var cmd = "C:\\Windows\\System32\\rundll32.exe powrprof.dll,SetSuspendState 0,1,1"
+func ExecuteCommand(Command CommandConfiguration) {
+	if Command.CommandType == "internal-dll" {
+		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "]")
+		sleepDLLImplementation()
+	} else {
+		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
+		sleepCommandLineImplementation(Command.Command)
+	}
+}
+
+func sleepCommandLineImplementation(cmd string) {
+	if cmd == "" {
+		cmd = "C:\\Windows\\System32\\rundll32.exe powrprof.dll,SetSuspendState 0,1,1"
+	}
 	Info.Println("Sleep implementation [windows], sleep command is [", cmd, "]")
 	_, _, err := Execute(cmd)
 	if err != nil {

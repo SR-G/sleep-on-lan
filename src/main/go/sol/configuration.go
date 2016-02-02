@@ -9,11 +9,19 @@ import (
 )
 
 type Configuration struct {
-	Listeners              []string
-	SleepCommand           string
-	LogLevel               string
-	BroadcastIP            string
-	listenersConfiguration []ListenerConfiguration
+	Listeners   []string // what is read from the sol.json configuration file
+	LogLevel    string
+	BroadcastIP string
+	Commands    []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
+
+	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners
+}
+
+type CommandConfiguration struct {
+	Operation   string `json:"Operation"`
+	Command     string `json:"Command"`
+	IsDefault   bool   `json:"Default"`
+	CommandType string `json:"Type"`
 }
 
 type ListenerConfiguration struct {
@@ -26,6 +34,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.Listeners = []string{"UDP:9", "HTTP:8009"}
 	conf.LogLevel = "INFO"
 	conf.BroadcastIP = "192.168.255.255"
+	// default commands are registered on Parse() method, depending on the current operating system
 }
 
 func (conf *Configuration) Load(configurationFileName string) {
@@ -43,6 +52,23 @@ func (conf *Configuration) Load(configurationFileName string) {
 }
 
 func (conf *Configuration) Parse() {
+	// Gestion logs
+	switch conf.LogLevel {
+	case "NONE", "OFF":
+		InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
+	case "DEBUG":
+		InitLoggers(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
+	case "INFO":
+		InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	case "WARN", "WARNING":
+		InitLoggers(ioutil.Discard, ioutil.Discard, os.Stdout, os.Stderr)
+	case "ERROR":
+		InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, os.Stderr)
+	default:
+		panic("unrecognized log level[" + conf.LogLevel + "], allowed are NONE or OFF, DEBUG, INFO, WARN or WARNING, ERROR")
+	}
+
+	// Convert activated ports
 	for _, s := range conf.Listeners {
 		var splitted = strings.Split(s, ":")
 		var key = splitted[0]
@@ -61,20 +87,14 @@ func (conf *Configuration) Parse() {
 			Error.Println("Unknown listener type [" + key + "], valid values are : UDP, HTTP")
 		}
 	}
-	Info.Println("Configuration loaded", conf)
+	Trace.Println("Configuration loaded", conf)
 
-	switch conf.LogLevel {
-	case "NONE", "OFF":
-		InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
-	case "DEBUG":
-		InitLoggers(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
-	case "INFO":
-		InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-	case "WARN", "WARNING":
-		InitLoggers(ioutil.Discard, ioutil.Discard, os.Stdout, os.Stderr)
-	case "ERROR":
-		InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, os.Stderr)
-	default:
-		panic("unrecognized log level[" + conf.LogLevel + "], allowed are NONE or OFF, DEBUG, INFO, WARN or WARNING, ERROR")
+	// If only one command, then force default, and if no commands are found, inject default ones
+	var nbCommands = len(conf.Commands)
+	if nbCommands == 0 {
+		RegisterDefaultCommand()
+	} else if nbCommands == 1 {
+		Info.Println("Only one command found in configuration, forcing default if needed")
+		conf.Commands[0].IsDefault = true
 	}
 }

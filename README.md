@@ -67,6 +67,54 @@ The REST services are exposed on 0.0.0.0 and are thus accessibles from http://lo
 
 **BroadcastIP** defines the broadcast IP used by the /wol service. By default the IP used is 192.168.255.255 (local network range).
 
+**Commands** defines the available commands.
+
+By default, on both windows and linux, only one command is defined : sleep command (through "pm-suspend" on linux and a DLL API call on windows).
+
+You may customize / override this behavior, or add new commands (that will then be available under `http://<IP>:<HTTP PORT>/<operation>` if a HTTP listener is defined), if needed.
+
+Each command has 4 attributes :
+- "Operation" : the name of the operation (for the HTTP url)
+- "Type" : the type of the operation, either "external" (by default, for remote execution) or "internal-dll" (on windows, to trigger a sleep  through a DLL API call)
+- "Default" : true or false. Default command will be executed when UDP magic packets are received. If only one command is defined, it will automatically be the default one
+- "Command" : for external commands, the exact command that has to be executed (see examples below). May have to contain full path on windows.
+
+Example 1 : only one (default) operation that will shutdown the system on windows. Through HTTP, the operation will be triggerable with `http://<IP>:<PORT_HTTP>/halt/`.
+
+<pre>
+  "Commands" : [ 
+    {
+        "Operation" : "halt",
+        "Command" : "C:\\Windows\\System32\\Shutdown.exe -s -t 0"
+    }]
+</pre>
+
+Example 2 : force sleep on windows through the rundll32.exe trick (and not through the default API call)
+
+<pre>
+  "Commands" : [ 
+    {
+        "Operation" : "sleep",
+        "Command" : "C:\\Windows\\System32\\rundll32.exe powrprof.dll,SetSuspendState 0,1,1"
+    }]
+</pre>
+
+Example 3 : default operation will put the computer to sleep on linux and a second operation will be published to shutdown the computer through HTTP.
+
+<pre>
+  "Commands" : [ 
+    {
+        "Operation" : "halt",
+        "Command" : "pm-halt",
+		"Default" : "false"
+    },
+    {
+        "Operation" : "sleep",
+        "Command" : "pm-sleep",
+		"Default" : "true"
+    }]
+</pre>
+
 ## Installation
 
 ### Under windows

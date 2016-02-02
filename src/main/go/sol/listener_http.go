@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -29,6 +30,19 @@ type RestResultHosts struct {
 	Hosts   []RestResultHost
 }
 
+type RestResultCommands struct {
+	XMLName  xml.Name `xml:"commands"`
+	Commands []RestResultCommandConfiguration
+}
+
+type RestResultCommandConfiguration struct {
+	XMLName   xml.Name `xml:"command"`
+	Operation string   `xml:"operation,attr"`
+	Command   string   `xml:"command,attr"`
+	IsDefault bool     `xml:"default,attr"`
+	Type      string   `xml:"type,attr"`
+}
+
 type RestResultListeners struct {
 	XMLName   xml.Name `xml:"listeners"`
 	Listeners []RestResultListenerConfiguration
@@ -46,6 +60,7 @@ type RestResult struct {
 	Application string   `xml:"application"`
 	Hosts       RestResultHosts
 	Listeners   RestResultListeners
+	Commands    RestResultCommands
 }
 
 func (h *RegexpHandler) Handler(re string, handler func(http.ResponseWriter, *http.Request)) {
@@ -67,9 +82,17 @@ func (h *RegexpHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	http.NotFound(rw, r)
 }
 
-func restSleep(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Going to sleep now")
-	Sleep()
+func restGenericOperation(w http.ResponseWriter, r *http.Request) {
+	items := strings.Split(r.URL.Path, "/")
+	operation := items[1]
+
+	for _, Command := range configuration.Commands {
+		if Command.Operation == operation {
+			io.WriteString(w, "Executing operation ["+operation+"]")
+			ExecuteCommand(Command)
+			break
+		}
+	}
 }
 
 func restIndex(w http.ResponseWriter, r *http.Request) {
@@ -77,11 +100,23 @@ func restIndex(w http.ResponseWriter, r *http.Request) {
 	result.Application = "sleep-on-lan"
 	result.Hosts = RestResultHosts{}
 	result.Listeners = RestResultListeners{}
-	for key, value := range LocalNetworkMap() {
-		result.Hosts.Hosts = append(result.Hosts.Hosts, RestResultHost{Ip: key, MacAddress: value})
+	result.Commands = RestResultCommands{}
+
+	interfaces := LocalNetworkMap()
+	ips := make([]string, 0, len(interfaces))
+	for key := range interfaces {
+		ips = append(ips, key)
+	}
+	sort.Strings(ips)
+	for _, ip := range ips {
+		result.Hosts.Hosts = append(result.Hosts.Hosts, RestResultHost{Ip: ip, MacAddress: interfaces[ip]})
 	}
 	for _, listenerConfiguration := range configuration.listenersConfiguration {
 		result.Listeners.Listeners = append(result.Listeners.Listeners, RestResultListenerConfiguration{Type: listenerConfiguration.nature, Port: listenerConfiguration.port, Active: listenerConfiguration.active})
+	}
+
+	for _, commandConfiguration := range configuration.Commands {
+		result.Commands.Commands = append(result.Commands.Commands, RestResultCommandConfiguration{Type: commandConfiguration.CommandType, Operation: commandConfiguration.Operation, Command: commandConfiguration.Command, IsDefault: commandConfiguration.IsDefault})
 	}
 
 	x, err := xml.MarshalIndent(result, "", "  ")
@@ -110,13 +145,17 @@ func restWol(w http.ResponseWriter, r *http.Request) {
 	magicPacket.Wake(configuration.BroadcastIP)
 }
 
-func ListenHTTP(port int) {
+func ListenHTTP(port int, commands []CommandConfiguration) {
 	localIp := "0.0.0.0"
 
 	routes := make(map[string]func(http.ResponseWriter, *http.Request))
-	routes["/sleep"] = restSleep
+	// routes["/sleep"] = restSleep
 	routes["/wol/[A-z]+"] = restWol
+	for _, command := range commands {
+		routes["/"+command.Operation] = restGenericOperation
+	}
 	routes["/"] = restIndex
+
 	// routes["/quit"] = restStopSleepOnLan
 
 	externalIp, _ := ExternalIP()

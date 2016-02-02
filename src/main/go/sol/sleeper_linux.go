@@ -1,20 +1,17 @@
 package main
 
-import (
-	// "fmt"
-	// "os/exec"
-)
-
-func Sleep() {
-	Info.Println("Sleep linux")
-	sleepCommandLineImplementation()
+func RegisterDefaultCommand() {
+	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: "external", IsDefault: true, Command: "pm-suspend"}
+	configuration.Commands = []CommandConfiguration{defaultCommand}
 }
 
-func sleepCommandLineImplementation() {
-	var cmd = ""
-	if configuration.SleepCommand != "" {
-		cmd = configuration.SleepCommand
-	} else {
+func ExecuteCommand(Command CommandConfiguration) {
+	Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.Command + "], command [" + Command.Command + "]")
+	sleepCommandLineImplementation(Command.Command)
+}
+
+func sleepCommandLineImplementation(cmd string) {
+	if cmd == "" {
 		cmd = "pm-suspend"
 	}
 	Info.Println("Sleep implementation [linux], sleep command is [" + cmd + "]")
