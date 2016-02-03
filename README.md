@@ -46,7 +46,8 @@ Content is as follow :
 <pre>{
   "Listeners" : ["UDP:9", "HTTP:8009" ],
   "LogLevel" : "INFO",
-  "BroadcastIP", "255.255.255.255"
+  "BroadcastIP" : "255.255.255.255",
+  "Commands" : []
 }
 </pre>
 
