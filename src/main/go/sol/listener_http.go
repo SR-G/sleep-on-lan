@@ -56,12 +56,13 @@ type RestResultListenerConfiguration struct {
 }
 
 type RestResult struct {
-	XMLName     xml.Name `xml:"result"`
-	Application string   `xml:"application"`
-	Version     string   `xml:"version"`
-	Hosts       RestResultHosts
-	Listeners   RestResultListeners
-	Commands    RestResultCommands
+	XMLName              xml.Name `xml:"result"`
+	Application          string   `xml:"application"`
+	Version              string   `xml:"version"`
+	CompilationTimestamp string   `xml:"compilation"`
+	Hosts                RestResultHosts
+	Listeners            RestResultListeners
+	Commands             RestResultCommands
 }
 
 func (h *RegexpHandler) Handler(re string, handler func(http.ResponseWriter, *http.Request)) {
@@ -98,8 +99,11 @@ func restGenericOperation(w http.ResponseWriter, r *http.Request) {
 
 func restIndex(w http.ResponseWriter, r *http.Request) {
 	result := &RestResult{}
-	result.Application = "sleep-on-lan"
-	result.Version = version
+	result.Application = APPLICATION_NAME
+	result.Version = VERSION
+	if BUILD_DATE != "" {
+		result.CompilationTimestamp = BUILD_DATE
+	}
 	result.Hosts = RestResultHosts{}
 	result.Listeners = RestResultListeners{}
 	result.Commands = RestResultCommands{}

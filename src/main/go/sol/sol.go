@@ -17,6 +17,7 @@ func main() {
 	configuration.InitDefaultConfiguration()
 	configuration.Load(fullConfigurationFileName)
 	configuration.Parse()
+	Info.Println("Application [" + APPLICATION_NAME + "], version [" + VERSION + "], compiled on [" + BUILD_DATE + "]")
 	Info.Println("Loaded configuration from [" + fullConfigurationFileName + "]")
 
 	Info.Println("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
