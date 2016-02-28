@@ -12,7 +12,12 @@ func RegisterDefaultCommand() {
 func ExecuteCommand(Command CommandConfiguration) {
 	if Command.CommandType == "internal-dll" {
 		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "]")
-		sleepDLLImplementation()
+		if Command.Operation == "sleep" {
+			sleepDLLImplementation()
+		}
+		if Command.Operation == "shutdown" {
+			shutdownDLLImplementation()
+		}
 	} else {
 		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
 		sleepCommandLineImplementation(Command.Command)
@@ -45,3 +50,21 @@ func sleepDLLImplementation() {
 
 	Info.Printf("Command executed, result code [" + string(ret) + "]")
 }
+
+func shutdownDLLImplementation() {
+	var mod = syscall.NewLazyDLL("Advapi32.dll")
+	var proc = mod.NewProc("InitiateSystemShutdown")
+
+	// DLL API : public static extern bool InitiateSystemShutdown(string lpMachineName, string lpMessage, int dwTimeout, bool bForceAppsClosed, bool bRebootAfterShutdown);
+	// ex. : uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("Done Title"))),
+	ret, _, _ := proc.Call(0,
+		string(""), // lpMachineName
+		string(""), // lpMessage
+		uintptr(0), // dwTimeout
+		uintptr(0), // bForceAppsClosed
+		uintptr(0)) // bRebootAfterShutdown
+
+	Info.Printf("Command executed, result code [" + string(ret) + "]")
+}
+
+
