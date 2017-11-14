@@ -1,6 +1,6 @@
 # Sleep On Lan (SOL)
 
-## Principe
+## Principle
 
 Wake-on-LAN is a standard low-level protocol implemented in various hardware. At this time, there is not standard to make the opposite and send a computer in sleep mode.
 
@@ -10,7 +10,7 @@ It works with the exact same magic packet than for Wake-On-LAN, the only differe
 
 Technically, you have to run a little daemon on your computer that will listen the same Wake-On-LAN port and send the computer in sleep mode when the reversed MAC address received matches a local address. 
 
-Written in GO, the code may run on linux and windows platforms.
+Written in `go`, the code may run on linux and windows platforms.
 
 ## Usage
 
@@ -174,10 +174,11 @@ Example of configuration under OpenHab.
 
 This is a very standard configuration : MAC addresses have just to be reversed.
 
-<pre>Switch  Network_WoL_Solaris   				"Wake PC (solaris)"   					<wake>			(WoL, Status, Network)   { wol="192.168.8.255#14:da:e9:01:98:19" }
-Switch  Network_WoL_Jupiter   				"Wake PC (jupiter)"   					<wake>			(WoL, Status, Network)   { wol="192.168.8.255#bc:5f:f4:2b:df:26" }
-Switch  Network_WoL_Laptop   				"Wake PC (laptop)"   					<wake>			(WoL, Status, Network)   { wol="192.168.8.255#C4:D9:87:7A:78:35" }
+<pre>
+Switch  Network_WoL_Solaris   	"Wake PC (solaris)"   <wake>		(WoL, Status, Network)   { wol="192.168.8.255#14:da:e9:01:98:19" }
+Switch  Network_WoL_Jupiter   	"Wake PC (jupiter)"   <wake>		(WoL, Status, Network)   { wol="192.168.8.255#bc:5f:f4:2b:df:26" }
+Switch  Network_WoL_Laptop   	"Wake PC (laptop)"    <wake>		(WoL, Status, Network)   { wol="192.168.8.255#C4:D9:87:7A:78:35" }
 
-Switch  Network_SoL_Solaris   				"Sleep PC (solaris)"   					<sleep>			(WoL, Status, Network)   { wol="192.168.8.255#19:98:01:e9:da:14" }
-Switch  Network_SoL_Laptop   				"Sleep PC (laptop)"   					<sleep>			(WoL, Status, Network)   { wol="192.168.8.255#35:78:7A:87:D9:C4" }
+Switch  Network_SoL_Solaris   	"Sleep PC (solaris)"  <sleep>		(WoL, Status, Network)   { wol="192.168.8.255#19:98:01:e9:da:14" }
+Switch  Network_SoL_Laptop   	"Sleep PC (laptop)"   <sleep>		(WoL, Status, Network)   { wol="192.168.8.255#35:78:7A:87:D9:C4" }
 </pre>
