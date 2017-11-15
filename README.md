@@ -182,3 +182,18 @@ Switch  Network_WoL_Laptop   	"Wake PC (laptop)"    <wake>		(WoL, Status, Networ
 Switch  Network_SoL_Solaris   	"Sleep PC (solaris)"  <sleep>		(WoL, Status, Network)   { wol="192.168.8.255#19:98:01:e9:da:14" }
 Switch  Network_SoL_Laptop   	"Sleep PC (laptop)"   <sleep>		(WoL, Status, Network)   { wol="192.168.8.255#35:78:7A:87:D9:C4" }
 </pre>
+
+## Developement
+
+Compile from docker :
+
+```bash
+docker run --rm -it -v $(pwd):/go golang /bin/bash
+go get -d .../.
+go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo tensin.org/watchthatpage 
+GOARCH=amd64 GOOS=windows go install ...
+
+cd /go/src
+GOARCH=amd64 GOOS=windows go install main/go/sol/
+
+```

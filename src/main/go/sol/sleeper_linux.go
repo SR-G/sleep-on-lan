@@ -6,7 +6,7 @@ func RegisterDefaultCommand() {
 }
 
 func ExecuteCommand(Command CommandConfiguration) {
-	Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.Command + "], command [" + Command.Command + "]")
+	Info.Println("Executing operation [" + Command.Operation + "], type [" + Command.Command + "], command [" + Command.Command + "]")
 	sleepCommandLineImplementation(Command.Command)
 }
 

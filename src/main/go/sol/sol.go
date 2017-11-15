@@ -17,7 +17,7 @@ func main() {
 	configuration.InitDefaultConfiguration()
 	configuration.Load(fullConfigurationFileName)
 	configuration.Parse()
-	Info.Println("Application [" + APPLICATION_NAME + "], version [" + VERSION + "], compiled on [" + BUILD_DATE + "]")
+	Info.Println("Application [" + Version.String() + "]")
 	Info.Println("Loaded configuration from [" + fullConfigurationFileName + "]")
 
 	Info.Println("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
@@ -25,8 +25,9 @@ func main() {
 		Info.Println(" - local IP adress [" + key + "], mac [" + value + "]")
 	}
 
+	Info.Println("Available commands are : ")
 	for _, command := range configuration.Commands {
-		Info.Println("  - operation [" + command.Operation + "], command [" + command.Command + "], default [" + strconv.FormatBool(command.IsDefault) + "], type [" + command.CommandType + "]")
+		Info.Println(" - operation [" + command.Operation + "], command [" + command.Command + "], default [" + strconv.FormatBool(command.IsDefault) + "], type [" + command.CommandType + "]")
 	}
 
 	for _, listenerConfiguration := range configuration.listenersConfiguration {

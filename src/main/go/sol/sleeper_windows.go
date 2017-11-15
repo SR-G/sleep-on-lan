@@ -2,6 +2,7 @@ package main
 
 import (
 	"syscall"
+	"fmt"
 )
 
 func RegisterDefaultCommand() {
@@ -42,6 +43,5 @@ func sleepDLLImplementation() {
 		uintptr(0), // hibernate
 		uintptr(1), // forceCritical
 		uintptr(1)) // disableWakeEvent
-
-	Info.Printf("Command executed, result code [" + string(ret) + "]")
+	Info.Printf("Command executed, result code [" + fmt.Sprint(ret) + "]")
 }

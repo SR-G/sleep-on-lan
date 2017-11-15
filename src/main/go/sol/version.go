@@ -1,14 +1,35 @@
 package main
 
-// Program has to be built with -ldflags "-X main.variable=VALUE"
-// ex. : -i -ldflags "-X main.VERSION=1.0.0-SNAPSHOT -X main.BUILD_DATE=1970-01-01_00:00:01"
-// ex. : -i -ldflags "-X main.VERSION=1.0.0-SNAPSHOT -X main.BUILD_DATE=\"%date\%"" (on windows, but doesn't work with LideIDE)
-// ex. : -i -ldflags "-X main.VERSION=1.0.0-SNAPSHOT -X main.BUILD_DATE=$(date -u '+%Y-%m-%d_%H:%M:%S')" (on linux)
+import (
+	"bytes"
+	"fmt"
+)
 
-// @see http://stackoverflow.com/questions/11354518/golang-application-auto-build-versioning
+type version struct {
+	Major, Minor, Patch int
+	Label               string
+	Name                string
+}
 
-// TODO(serge) : put a gradle or a cmake makefile around this
+const projectName = "sleep-on-lan"
 
-var APPLICATION_NAME string = "sleep-on-lan"
-var VERSION string
-var BUILD_DATE string
+// Version string
+var Version = version{1, 0, 0, "SNAPSHOT", "FIRST_ITERATION"}
+
+// Build string
+var Build string
+
+func (v version) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%s version %d.%d.%d", projectName, v.Major, v.Minor, v.Patch))
+	if v.Label != "" {
+		buf.WriteString("-" + v.Label)
+	}
+	if v.Name != "" {
+		buf.WriteString(" \"" + v.Name + "\"")
+	}
+	if Build != "" {
+		buf.WriteString("\nGit commit hash: " + Build)
+	}
+	return buf.String()
+}
