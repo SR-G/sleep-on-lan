@@ -6,17 +6,19 @@ import (
 )
 
 func RegisterDefaultCommand() {
-	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: "internal-dll", IsDefault: true}
+	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: true}
 	configuration.Commands = []CommandConfiguration{defaultCommand}
 }
 
 func ExecuteCommand(Command CommandConfiguration) {
-	if Command.CommandType == "internal-dll" {
+	if Command.CommandType == COMMAND_TYPE_INTERNAL_DLL {
 		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "]")
 		sleepDLLImplementation()
-	} else {
+	} else if Command.CommandType == COMMAND_TYPE_EXTERNAL {
 		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
 		sleepCommandLineImplementation(Command.Command)
+	} else {
+		Info.Println("Unknown command type [" + Command.CommandType + "]")
 	}
 }
 

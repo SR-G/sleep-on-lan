@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+const (
+	COMMAND_TYPE_EXTERNAL = "external"
+	COMMAND_TYPE_INTERNAL_DLL = "internal-dll"
+)
+
 type Configuration struct {
 	Listeners   []string // what is read from the sol.json configuration file
 	LogLevel    string
@@ -97,4 +102,14 @@ func (conf *Configuration) Parse() {
 		Info.Println("Only one command found in configuration, forcing default if needed")
 		conf.Commands[0].IsDefault = true
 	}
+
+	// Set type to external if not provided
+	for idx, _ := range conf.Commands {
+		command := &conf.Commands[idx]
+		if command.CommandType == ""  {
+			Info.Println("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
+			command.CommandType = COMMAND_TYPE_EXTERNAL
+		}
+	}
+
 }

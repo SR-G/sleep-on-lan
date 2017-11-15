@@ -63,7 +63,7 @@ type RestResult struct {
 type RestOperationResult struct {
 	XMLName              xml.Name `xml:"result"`
 	Operation            string   `xml:"operation"`
-	Result				 bool     `xml:"result"`
+	Result				 bool     `xml:"successful"`
 }
 
 func dumpRoute(route string) {
@@ -89,8 +89,8 @@ func ListenHTTP(port int, commands []CommandConfiguration) {
 	dumpRoute("")
 	e.GET("/", func(c echo.Context) error {
 		result := &RestResult{}
-		result.Application = Version.Label
-		result.Version = strconv.Itoa(Version.Major) + "." + strconv.Itoa(Version.Minor) + "." + strconv.Itoa(Version.Patch)
+		result.Application = Version.VersionLabel
+		result.Version = Version.Version()
 		if Build != "" {
 			result.CompilationTimestamp = Build
 		}

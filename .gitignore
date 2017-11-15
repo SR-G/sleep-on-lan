@@ -3,3 +3,5 @@ target
 build
 *.exe
 pkg
+src/sol
+src/sol.json

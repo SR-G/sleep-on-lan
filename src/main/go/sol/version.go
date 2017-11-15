@@ -6,27 +6,35 @@ import (
 )
 
 type version struct {
+	ApplicationName     string
 	Major, Minor, Patch int
-	Label               string
-	Name                string
+	VersionLabel        string
+	VersionName         string
 }
 
-const projectName = "sleep-on-lan"
-
 // Version string
-var Version = version{1, 0, 0, "SNAPSHOT", "FIRST_ITERATION"}
+var Version = version{"sleep-on-lan", 1, 0, 0, "SNAPSHOT", ""}
 
 // Build string
 var Build string
 
+func (v version) Version() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch))
+	if v.VersionLabel != "" {
+		buf.WriteString("-" + v.VersionLabel)
+	}
+	return buf.String()
+}
+
 func (v version) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s version %d.%d.%d", projectName, v.Major, v.Minor, v.Patch))
-	if v.Label != "" {
-		buf.WriteString("-" + v.Label)
+	buf.WriteString(fmt.Sprintf("%s version %d.%d.%d", v.ApplicationName, v.Major, v.Minor, v.Patch))
+	if v.VersionLabel != "" {
+		buf.WriteString("-" + v.VersionLabel)
 	}
-	if v.Name != "" {
-		buf.WriteString(" \"" + v.Name + "\"")
+	if v.VersionName != "" {
+		buf.WriteString(" \"" + v.VersionName + "\"")
 	}
 	if Build != "" {
 		buf.WriteString("\nGit commit hash: " + Build)

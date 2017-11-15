@@ -1,13 +1,17 @@
 package main
 
 func RegisterDefaultCommand() {
-	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: "external", IsDefault: true, Command: "pm-suspend"}
+	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: COMMAND_TYPE_EXTERNAL, IsDefault: true, Command: "pm-suspend"}
 	configuration.Commands = []CommandConfiguration{defaultCommand}
 }
 
 func ExecuteCommand(Command CommandConfiguration) {
-	Info.Println("Executing operation [" + Command.Operation + "], type [" + Command.Command + "], command [" + Command.Command + "]")
-	sleepCommandLineImplementation(Command.Command)
+	if Command.CommandType == COMMAND_TYPE_EXTERNAL {
+		Info.Println("Executing operation [" + Command.Operation + "], type [" + Command.Command + "], command [" + Command.Command + "]")
+		sleepCommandLineImplementation(Command.Command)
+	} else {
+		Info.Println("Unknown command type [" + Command.CommandType + "]")
+	}
 }
 
 func sleepCommandLineImplementation(cmd string) {
