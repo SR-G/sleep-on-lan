@@ -192,8 +192,27 @@ docker run --rm -it -v $(pwd):/go golang /bin/bash
 go get -d .../.
 go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo tensin.org/watchthatpage 
 GOARCH=amd64 GOOS=windows go install ...
+```
 
+Create binaries :
+
+```bash
 cd /go/src
 GOARCH=amd64 GOOS=windows go install main/go/sol/
+GOARCH=amd64 GOOS=linux go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo main/go/sol/
+```
 
+Create distribution :
+
+```bash
+VERSION=SleepOnLAN-1.0.2-SNAPSHOT
+mkdir /go/bin/linux/
+mv /go/bin/sol /go/bin/linux
+cp /go/src/main/resources/sol.json /go/bin/linux/ 
+cp /go/src/main/resources/sol.json /go/bin/windows_amd64/
+cp /go/src/script/*.bat /go/bin/windows_amd64
+cd /go/bin/
+zip -r -9 $VERSION.zip linux
+zip -r -9 $VERSION.zip windows_amd64
+cd -
 ```
