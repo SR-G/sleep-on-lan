@@ -4,35 +4,37 @@ SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 BINARY=sol
 PWD := $(shell pwd)
 
-VERSION=1.0.0
+VERSION=1.0.2-SNAPSHOT
+PACKAGE=SleepOnLAN-${VERSION}
 BUILD_TIME=$(date "%FT%T%z")
 
 LDFLAGS=-ldflags "-d -s -w -X tensin.org/sol/core/version.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo
-PACKAGE=tensin.org/sol
-
-$(BINARY): $(SOURCES)
-	        go build ${LDFLAGS} -o bin/${BINARY} ${PACKAGE}
 
 .PHONY: install clean deploy run 
 
 build:
-	        time go install ${PACKAGE}
-
-install:
-	        time go install ${LDFLAGS} ${PACKAGE}
-
-deploy:
-	        cp bin/webscrapper /home/bin/
+	        cd /go/src/
+			go install main/go/sol/
 
 clean:
-	        rm bin/cache/*
-	        [ -f bin/${BINARY} ] && rm -f bin/${BINARY}
+	        rm -rf bin
 
 run:
 	        bin/sol
 
-test:
-	        go test -v tensin.org/webscrapper/core
+distribution: install
+			mkdir /go/bin/linux/ 
+			mv /go/bin/sol /go/bin/linux
+			cp /go/src/main/resources/sol.json /go/bin/linux/ 
+			cp /go/src/main/resources/sol.json /go/bin/windows_amd64/
+			cp /go/src/script/*.bat /go/bin/windows_amd64
+			cd /go/bin/ ; zip -r -9 ${PACKAGE}.zip ./linux ; zip -r -9 ${PACKAGE}.zip ./windows_amd64
+
+install: clean
+			rm -rf /go/bin
+			cd /go/src
+			GOARCH=amd64 GOOS=windows go install main/go/sol/
+			GOARCH=amd64 GOOS=linux go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo main/go/sol/
 
 docker:
 	        docker run --rm -it -v ${PWD}:/go tensin-app-golang /bin/bash
