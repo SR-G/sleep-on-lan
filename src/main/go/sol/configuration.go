@@ -44,7 +44,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 
 func (conf *Configuration) Load(configurationFileName string) {
 	if _, err := os.Stat(configurationFileName); err == nil {
-		Info.Println("Configuration file found under [" + configurationFileName + "] now reading content")
+		Info.Println("Configuration file found under [" + configurationFileName + "], now reading content")
 		file, _ := os.Open(configurationFileName)
 		decoder := json.NewDecoder(file)
 		err := decoder.Decode(&conf)
@@ -52,7 +52,7 @@ func (conf *Configuration) Load(configurationFileName string) {
 			Error.Println("error while loading configuration :", err)
 		}
 	} else {
-		Info.Println("No external configuration file found under [" + configurationFileName + "] will use default values")
+		Info.Println("No external configuration file found under [" + configurationFileName + "], will use default values")
 	}
 }
 
