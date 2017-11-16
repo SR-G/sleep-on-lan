@@ -81,6 +81,7 @@ func ListenHTTP(port int, commands []CommandConfiguration) {
 	*/
 
 	e := echo.New()
+	e.HideBanner = true
 	
 	// e.File("/", "public/index.html")
 	// e.Static("/", "public")
