@@ -2,6 +2,7 @@ package main
 
 import (
     "io"
+    "os"
     "io/ioutil"
     "log"
 )
@@ -14,7 +15,7 @@ var (
 )
 
 func PreInitLoggers() {
-    InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard) 
+    InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 }
 
 func InitLoggers(traceHandle io.Writer, infoHandle io.Writer, warningHandle io.Writer, errorHandle io.Writer) {

@@ -18,7 +18,7 @@ func main() {
 	configuration.Load(fullConfigurationFileName)
 	configuration.Parse()
 	Info.Println("Application [" + Version.ApplicationName + "], version [" + Version.Version() + "]")
-	Info.Println("Loaded configuration from [" + fullConfigurationFileName + "]")
+	// Info.Println("Loaded configuration from [" + fullConfigurationFileName + "]")
 
 	Info.Println("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
 	for key, value := range LocalNetworkMap() {
