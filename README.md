@@ -75,7 +75,7 @@ Rest service may be secured if needed through an optional `Auth` configuration (
 }
 </pre>
 
-Authed REST may still be triggered from a remote auth, if needed, through : 
+Authed REST may still be triggered from a remote host, if needed, through : 
 
 ```
 curl http://myusername:mypassword@<IP>/sleep/
