@@ -89,9 +89,9 @@ func ListenHTTP(port int, commands []CommandConfiguration, auth AuthConfiguratio
 	// e.Use(middleware.Gzip())
 
 	if auth.isEmpty() {
-		Info.Println("HTTP starting on port [" + strings.Itoa(port) + "], without auth")
+		Info.Println("HTTP starting on port [" + strconv.Itoa(port) + "], without auth")
 	} else {
-		Info.Println("HTTP starting on port [" + strings.Itoa(port) + "], with auth activated : login [" + auth.Login + "], password [" + strings.Repeat("*", len(auth.Password)) + "]")
+		Info.Println("HTTP starting on port [" + strconv.Itoa(port) + "], with auth activated : login [" + auth.Login + "], password [" + strings.Repeat("*", len(auth.Password)) + "]")
 		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 			if username == auth.Login && password == auth.Password {
 				return true, nil
