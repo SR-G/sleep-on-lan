@@ -72,7 +72,8 @@ func leftPad2Len(s string, padStr string, overallLen int) string {
 }
 
 func doAction() {
-	for _, Command := range configuration.Commands {
+	for idx, _ := range configuration.Commands {
+		Command := configuration.Commands[idx]
 		if Command.IsDefault {
 			ExecuteCommand(Command)
 			break

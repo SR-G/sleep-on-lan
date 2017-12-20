@@ -19,6 +19,7 @@ type Configuration struct {
 	BroadcastIP string
 	Commands    []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
 	Auth		AuthConfiguration  // optional
+	HTTPOutput  string
 
 	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners
 }
@@ -49,6 +50,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.Listeners = []string{"UDP:9", "HTTP:8009"}
 	conf.LogLevel = "INFO"
 	conf.BroadcastIP = "192.168.255.255"
+	conf.HTTPOutput = "XML"
 	// default commands are registered on Parse() method, depending on the current operating system
 }
 

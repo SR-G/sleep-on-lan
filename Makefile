@@ -24,6 +24,9 @@ build:
 clean:
 	rm -rf bin
 
+conf:
+	cp /go/src/main/resources/sol.json /go/bin/
+
 run:
 	bin/sol
 
