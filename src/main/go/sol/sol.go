@@ -35,7 +35,7 @@ func main() {
 			if strings.EqualFold(listenerConfiguration.nature, "UDP") {
 				go ListenUDP(listenerConfiguration.port)
 			} else if strings.EqualFold(listenerConfiguration.nature, "HTTP") {
-				go ListenHTTP(listenerConfiguration.port, configuration.Commands)
+				go ListenHTTP(listenerConfiguration.port, configuration.Commands, configuration.Auth)
 			}
 		}
 	}

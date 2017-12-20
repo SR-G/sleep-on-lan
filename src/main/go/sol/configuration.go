@@ -18,15 +18,25 @@ type Configuration struct {
 	LogLevel    string
 	BroadcastIP string
 	Commands    []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
+	Auth		AuthConfiguration  // optional
 
 	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners
 }
 
+type AuthConfiguration struct {
+	Login 		string `json:"Login"`
+	Password	string `json:"password"`
+}
+
+func (a AuthConfiguration) isEmpty() bool {
+    return a.Login == "" && a.Password == ""
+}
+
 type CommandConfiguration struct {
-	Operation   string `json:"Operation"`
-	Command     string `json:"Command"`
-	IsDefault   bool   `json:"Default"`
-	CommandType string `json:"Type"`
+	Operation    string `json:"Operation"`
+	Command      string `json:"Command"`
+	IsDefault    bool   `json:"Default"`
+	CommandType  string `json:"Type"`
 }
 
 type ListenerConfiguration struct {
@@ -111,5 +121,4 @@ func (conf *Configuration) Parse() {
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
 	}
-
 }

@@ -8,9 +8,10 @@ import (
 	// "encoding/json"
 	// "io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo"
-	// "github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/middleware"
 	// "github.com/labstack/echo/engine/standard"
 )
 
@@ -70,7 +71,7 @@ func dumpRoute(route string) {
 	Info.Println("Registering route [/" + route + "]")
 }
 
-func ListenHTTP(port int, commands []CommandConfiguration) {
+func ListenHTTP(port int, commands []CommandConfiguration, auth AuthConfiguration) {
 	// externalIp, _ := ExternalIP()
 	// baseExternalUrl := "http://" + externalIp + ":" + strconv.Itoa(port)
 	// Info.Println("Now listening HTTP on port [" + strconv.Itoa(port) + "], urls will be : ")
@@ -86,6 +87,18 @@ func ListenHTTP(port int, commands []CommandConfiguration) {
 	// e.File("/", "public/index.html")
 	// e.Static("/", "public")
 	// e.Use(middleware.Gzip())
+
+	if auth.isEmpty() {
+		Info.Println("HTTP starting on port [" + strings.Itoa(port) + "], without auth")
+	} else {
+		Info.Println("HTTP starting on port [" + strings.Itoa(port) + "], with auth activated : login [" + auth.Login + "], password [" + strings.Repeat("*", len(auth.Password)) + "]")
+		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+			if username == auth.Login && password == auth.Password {
+				return true, nil
+			}
+			return false, nil
+		}))
+	}
 
 	dumpRoute("")
 	e.GET("/", func(c echo.Context) error {
@@ -123,13 +136,18 @@ func ListenHTTP(port int, commands []CommandConfiguration) {
 	for _, command := range commands {
 		dumpRoute(command.Operation)
 		e.GET("/" + command.Operation, func(c echo.Context) error {
+			
+			items := strings.Split(c.Request().URL.Path, "/")
+			operation := items[1]
+
 			result := &RestOperationResult{
-				Operation:  command.Operation,
+				Operation:  operation,
 				Result: true,
 			}
-			for _, availableCommand := range configuration.Commands {
-				if availableCommand.Operation == command.Operation {
-					Info.Println("Executing [" + command.Operation + "]")
+			for idx, _ := range configuration.Commands {
+				availableCommand := configuration.Commands[idx]
+				if availableCommand.Operation == operation {
+					Info.Println("Executing [" + operation + "]")
 					ExecuteCommand(availableCommand)
 					break
 				}
