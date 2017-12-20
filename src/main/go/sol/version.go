@@ -13,7 +13,7 @@ type version struct {
 }
 
 // Version string
-var Version = version{"sleep-on-lan", 1, 0, 3, "SNAPSHOT", ""}
+var Version = version{"sleep-on-lan", 1, 0, 4, "SNAPSHOT", ""}
 
 // Build string
 var Build string

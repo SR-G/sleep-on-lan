@@ -4,7 +4,7 @@ SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 BINARY=sol
 PWD := $(shell pwd)
 
-VERSION=1.0.3-SNAPSHOT
+VERSION=1.0.4-SNAPSHOT
 PACKAGE=SleepOnLAN-${VERSION}
 BUILD_TIME=$(date "%FT%T%z")
 
