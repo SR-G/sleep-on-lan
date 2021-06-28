@@ -8,7 +8,7 @@ VERSION=1.0.5-SNAPSHOT
 PACKAGE=SleepOnLAN-${VERSION}
 BUILD_TIME=$(date "%FT%T%z")
 
-LDFLAGS=-ldflags "-d -s -w -X tensin.org/sol/core/version.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo
+LDFLAGS=-ldflags "-d -s -w -X sleep-on-lan/version.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo
 ifeq ($(shell hostname),jupiter)
 	DOCKER_IMAGE="tensin-app-golang"
 else
