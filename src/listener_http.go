@@ -6,17 +6,13 @@ import (
 	"sort"
 	"strconv"
 	"time"
-	// "encoding/json"
-	// "io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	// "github.com/labstack/echo/engine/standard"
 
 	"github.com/go-ping/ping" // for ping
-	// "github.com/sparrc/go-ping" // for ping
 	// "github.com/mdlayher/arp" // for mac > ip conversion
 )
 
@@ -24,6 +20,7 @@ type RestResultHost struct {
 	XMLName    xml.Name `xml:"host" json:"-"`
 	Ip         string   `xml:"ip,attr"`
 	MacAddress string   `xml:"mac,attr"`
+	ReversedMacAddress string `xml:"reversed-mac,attr" json:"-"`
 }
 
 type RestResultHosts struct {
@@ -125,6 +122,15 @@ func pingIp(ip string) *RestStateResult {
 	return result
 }
 
+func reverseMacAddress(address string) string {
+  tokens := strings.Split(address, ":")
+  last := len(tokens) - 1
+  for i := 0; i < len(tokens)/2; i++ {
+    tokens[i], tokens[last-i] = tokens[last-i], tokens[i]
+  }
+  return strings.Join(tokens, ":")
+}
+
 func ListenHTTP(port int) {
 	// externalIp, _ := ExternalIP()
 	// baseExternalUrl := "http://" + externalIp + ":" + strconv.Itoa(port)
@@ -173,7 +179,7 @@ func ListenHTTP(port int) {
 		}
 		sort.Strings(ips)
 		for _, ip := range ips {
-			result.Hosts.Hosts = append(result.Hosts.Hosts, RestResultHost{Ip: ip, MacAddress: interfaces[ip]})
+			result.Hosts.Hosts = append(result.Hosts.Hosts, RestResultHost{Ip: ip, MacAddress: interfaces[ip], ReversedMacAddress: reverseMacAddress(interfaces[ip])})
 		}
 		for _, listenerConfiguration := range configuration.listenersConfiguration {
 			result.Listeners.Listeners = append(result.Listeners.Listeners, RestResultListenerConfiguration{Type: listenerConfiguration.nature, Port: listenerConfiguration.port, Active: listenerConfiguration.active})

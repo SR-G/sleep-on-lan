@@ -87,6 +87,18 @@ Default output from REST command is `XML` but may be switched from a configurati
 
 **BroadcastIP** defines the broadcast IP used by the /wol service. By default the IP used is 192.168.255.255 (local network range).
 
+**AvoidDualUDPSending** to activate one internal mechanizm allowing a small delay before executing commands. This may allow dual UDP sent by some clients to be discarded, instead of being executed twice. False by default. Delay (if feature is enabled) is 100ms by default (can be overriden to something like "1s", ...)
+
+<pre>
+{
+  "LogLevel" : "INFO",
+  "AvoidDualUDPSending" : {
+          "Active": true,
+          "Delay": "100ms"
+  }
+}
+</pre>
+
 **Commands** defines the available commands.
 
 By default, on both windows and linux, only one command is defined : sleep command (through "pm-suspend" on linux and a DLL API call on windows).
