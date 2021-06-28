@@ -4,7 +4,7 @@ SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 BINARY=sol
 PWD := $(shell pwd)
 
-VERSION=1.0.4-SNAPSHOT
+VERSION=1.0.5-SNAPSHOT
 PACKAGE=SleepOnLAN-${VERSION}
 BUILD_TIME=$(date "%FT%T%z")
 
@@ -24,14 +24,16 @@ clean:
 	rm -rf bin
 
 conf:
+	mkdir bin/
 	cp resources/sol.json bin/
 
 run:
 	bin/sol
 
 distribution: install
-	mkdir bin/linux/ 
-	mv bin/sol bin/linux
+	mkdir -p bin/linux/ bin/windows_amd64/
+	cp ../go/bin/sleep-on-lan bin/linux/sol
+	cp ../go/bin/windows_amd64/sleep-on-lan.exe bin/windows_amd64/sol.exe
 	cp resources/sol.json bin/linux/ 
 	cp resources/sol.json bin/windows_amd64/
 	cp resources/script/*.bat bin/windows_amd64
