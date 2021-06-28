@@ -2,7 +2,7 @@
   "Listeners" : ["UDP:9", "UDP:7", "HTTP:8009" ],
   "LogLevel" : "INFO",
   "AvoidDualUDPSending" : {
-	  "Active": true,
+	  "Active": false,
 	  "Delay": "100ms"
   }
 }
