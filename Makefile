@@ -17,7 +17,10 @@ endif
 
 .PHONY: install clean deploy run 
 
+.ONESHELL: # Applies to every targets in the file!
+
 build:
+	cd src/
 	go install sleep-on-lan
 
 clean:
@@ -28,19 +31,19 @@ conf:
 	cp resources/sol.json bin/
 
 run:
-	bin/sol
+	${GOPATH}/bin/sleep-on-lan
 
 distribution: install
 	mkdir -p bin/linux/ bin/windows_amd64/
-	cp ../go/bin/sleep-on-lan bin/linux/sol
-	cp ../go/bin/windows_amd64/sleep-on-lan.exe bin/windows_amd64/sol.exe
+	cp ${GOPATH}/bin/sleep-on-lan bin/linux/sol
+	cp ${GOPATH}/bin/windows_amd64/sleep-on-lan.exe bin/windows_amd64/sol.exe
 	cp resources/sol.json bin/linux/ 
 	cp resources/sol.json bin/windows_amd64/
 	cp resources/script/*.bat bin/windows_amd64
 	cd bin/ ; zip -r -9 ${PACKAGE}.zip ./linux ; zip -r -9 ${PACKAGE}.zip ./windows_amd64
 
 install: clean
-	rm -rf bin
+	cd src/
 	GOARCH=amd64 GOOS=windows go install sleep-on-lan
 	GOARCH=amd64 GOOS=linux go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo sleep-on-lan
 
