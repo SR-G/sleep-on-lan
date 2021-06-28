@@ -131,6 +131,11 @@ func reverseMacAddress(address string) string {
   return strings.Join(tokens, ":")
 }
 
+func executeCommandWithDelay(availableCommand CommandConfiguration) {
+  time.Sleep(250 * time.Millisecond)
+  ExecuteCommand(availableCommand)
+}
+
 func ListenHTTP(port int) {
 	// externalIp, _ := ExternalIP()
 	// baseExternalUrl := "http://" + externalIp + ":" + strconv.Itoa(port)
@@ -208,7 +213,7 @@ func ListenHTTP(port int) {
 				availableCommand := configuration.Commands[idx]
 				if availableCommand.Operation == operation {
 					Info.Println("Executing [" + operation + "]")
-					ExecuteCommand(availableCommand)
+					go executeCommandWithDelay(availableCommand)
 					break
 				}
 			}			
