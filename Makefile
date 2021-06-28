@@ -48,4 +48,4 @@ install: clean
 	GOARCH=amd64 GOOS=linux go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo sleep-on-lan
 
 docker:
-	docker run --rm -it -v ${PWD}:/go ${DOCKER_IMAGE} /bin/bash
+	docker run --rm -it --name "docker-sleep-on-lan-build" -p 8009:8009 -v ${PWD}:/go ${DOCKER_IMAGE} /bin/bash
