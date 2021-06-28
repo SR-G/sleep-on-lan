@@ -15,7 +15,8 @@ import (
 	"github.com/labstack/echo/middleware"
 	// "github.com/labstack/echo/engine/standard"
 
-	"github.com/sparrc/go-ping" // for ping
+	"github.com/go-ping/ping" // for ping
+	// "github.com/sparrc/go-ping" // for ping
 	// "github.com/mdlayher/arp" // for mac > ip conversion
 )
 
