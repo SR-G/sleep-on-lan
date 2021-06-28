@@ -4,9 +4,12 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type MagicPacket []byte
+
+var isActionInProgress bool = false
 
 func ListenUDP(port int) {
 	Info.Println("Now listening UDP packets on port [" + strconv.Itoa(port) + "]")
@@ -28,9 +31,27 @@ func ListenUDP(port int) {
 		Info.Println("Received a MAC address from IP [" + remote.String() + "], extracted mac [" + extractedMacAddress.String() + "]")
 		if matchAddress(extractedMacAddress) {
 			Info.Println("(reversed) received MAC address match a local address")
-			doAction()
+			if (configuration.AvoidDualUDPSending.AvoidDualUDPSendingActive) {
+				// Specific behavior : let's try to avoid dual UDP sending
+				if (!isActionInProgress) {
+					isActionInProgress = true
+					Info.Println("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]");
+					go doActionWithDelay()
+				} else {
+					Info.Println("Another command is already awaiting, rejecting this one due to dual UDP sending avoidance being activated")
+				}
+			} else {
+				// Regular behavior, let's just execute command
+				doAction()
+			}
 		}
 	}
+}
+
+func doActionWithDelay() {
+	delay, _ := time.ParseDuration(configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay)
+	time.Sleep(delay)
+	doAction()
 }
 
 func matchAddress(receivedAddress net.HardwareAddr) bool {
@@ -75,6 +96,7 @@ func doAction() {
 	for idx, _ := range configuration.Commands {
 		Command := configuration.Commands[idx]
 		if Command.IsDefault {
+			isActionInProgress = false
 			ExecuteCommand(Command)
 			break
 		}

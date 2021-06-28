@@ -20,13 +20,20 @@ type Configuration struct {
 	Commands    []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
 	Auth		AuthConfiguration  // optional
 	HTTPOutput  string
+	AvoidDualUDPSending AvoidDualUDPSendingConfiguration
 
 	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners
 }
 
+type AvoidDualUDPSendingConfiguration struct {
+	AvoidDualUDPSendingActive bool `json:"Active"`
+	AvoidDualUDPSendingDelay string `json:"Delay"`
+}
+
+
 type AuthConfiguration struct {
 	Login 		string `json:"Login"`
-	Password	string `json:"password"`
+	Password	string `json:"Password"`
 }
 
 func (a AuthConfiguration) isEmpty() bool {
@@ -51,6 +58,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.LogLevel = "INFO"
 	conf.BroadcastIP = "192.168.255.255"
 	conf.HTTPOutput = "XML"
+	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{ AvoidDualUDPSendingActive: false, AvoidDualUDPSendingDelay: "100ms" }
 	// default commands are registered on Parse() method, depending on the current operating system
 }
 
@@ -122,5 +130,12 @@ func (conf *Configuration) Parse() {
 			Info.Println("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
+	}
+
+	// Avoid dual UDP sending
+	if (conf.AvoidDualUDPSending.AvoidDualUDPSendingActive) {
+		Info.Println("Avoid dual UDP sending enabled, delay is ["  + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
+	} else {
+		Info.Println("Avoid dual UDP sending not enabled")
 	}
 }
