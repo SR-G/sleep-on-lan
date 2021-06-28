@@ -253,20 +253,34 @@ Switch  Network_SoL_Laptop   	"Sleep PC (laptop)"   <sleep>		(WoL, Status, Netwo
 
 ## Developement
 
-Compile from docker (from host) :
+A few commands are available through the provided `Makefile` : 
+
+- Launch a `golang` docker container (to be executed from host) :
 
 ```bash
 make docker
 ```
 
-Create binaries (from docker container) :
+- Create binaries (from the inside of the container) :
 
 ```bash
 make install
 ```
 
-Create distribution (from docker container) :
+- Create distribution (from the inside of the container - note, `zip` package is required) :
 
 ```bash
 make distribution
+```
+
+- Clean everything : 
+
+```bash
+make clean
+```
+
+- Launch the generated binary (from the inside of the container) : 
+
+```bash
+make run
 ```
