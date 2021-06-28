@@ -8,19 +8,19 @@ This project allows a windows or linux box to be put into sleep from any other d
 
 It works with the exact same magic packet than for Wake-On-LAN, the only difference is that the MAC address has to be written in reverse order.
 
-Technically, you have to run a little daemon on your computer that will listen the same Wake-On-LAN port and send the computer in sleep mode when the reversed MAC address received matches a local address. 
+Technically, you have to run a little daemon (the `sleep-on-lan` program` on your computeri, server, NAS, ... that will listen the same Wake-On-LAN port and send the computer in sleep mode when the reversed MAC address received matches a local address. Additionnaly, it can also be triggered through a REST endpoint (with something like `curl`). Executed commands are fully customizable.
 
-Written in `go`, the code may run on linux and windows platforms.
+Written in `go`, the code shoud run on linux and windows platforms.
 
 ## Usage
 
-Grab the latest windows + linux release : https://github.com/SR-G/sleep-on-lan/releases/
+Grab the latest windows + linux release or snapshot : https://github.com/SR-G/sleep-on-lan/releases/
 
 ### Sleep through UDP
 
 Just send a regular wake-on-lan command but with a reversed MAC address. Thus, the same wake-on-lan tools may be used for both wake and sleep operations (python wake-on-lan script, OpenHab WoL plugin, Android applications, and so on).
 
-Provided you are using a wake-on-lan script like this one [wake-on-lan python script](https://github.com/jpoliv/wakeonlan) (available as a debian package for example), you may use :
+Provided you are using a wake-on-lan script like this one : [wake-on-lan python script](https://github.com/jpoliv/wakeonlan) (available as a debian package for example), you may use :
 
 <pre>wakeonlan c4:d9:87:7a:78:35 192.168.255.255 // regular mac address, will wake an asleep computer
 wakeonlan 35:78:7a:87:d9:c4 192.168.255.255 // reversed mac address, will trigger the UDP listener of the sleep-on-lan process and will thus remotely sleep the computer
@@ -28,23 +28,33 @@ wakeonlan 35:78:7a:87:d9:c4 192.168.255.255 // reversed mac address, will trigge
 
 ### Sleep through REST service
 
-If this HTTP listener is activated, the SleepOnLan process then exposes a few REST services, for example :
+If this HTTP listener is activated, the Sleep-On-Lan process then exposes a few REST services, for example :
 
 <pre>http://127.0.0.1:8009/                               // index page, just shows local IP / mac
 http://127.0.0.1:8009/sleep                          // remotely sleep this computer through this URL
 http://127.0.0.1:8009/wol/c4:d9:87:7a:78:35          // sends a wake-on-lan magic packet on the network to the provided mac address
 </pre>
 
+(all available endpoints are displayed in the logs of the process when it starts)
+
 ## Configuration
 
 An optional configuration file may be used.
 
-Taken automatically if named "sol.json" and located in the same folder than the SleepOnLan binary.
+Taken automatically in account if named `sol.json` and located in the same folder than the Sleep-On-Lan binary.
 
-Content is as follow :
+Content is as follow (everything is optional / below is the whole structure) :
 
 <pre>{
   "Listeners" : ["UDP:9", "HTTP:8009" ],
+  "Auth" : {
+      "Login" : "myusername",
+      "Password" : "mypassword"
+  },
+  "AvoidDualUDPSending" : {
+          "Active": true,
+          "Delay": "100ms"
+  },
   "LogLevel" : "INFO",
   "BroadcastIP" : "255.255.255.255",
   "Commands" : []
@@ -138,12 +148,12 @@ Example 3 : default operation will put the computer to sleep on linux and a seco
     {
         "Operation" : "halt",
         "Command" : "pm-halt",
-		"Default" : "false"
+        "Default" : "false"
     },
     {
         "Operation" : "sleep",
         "Command" : "pm-sleep",
-		"Default" : "true"
+        "Default" : "true"
     }]
 </pre>
 
@@ -151,7 +161,7 @@ Example 3 : default operation will put the computer to sleep on linux and a seco
 
 ### Under windows
 
-The SleepOnLan process may be run manually or, for convenience, installed as a service. The easiest way to install the SleepOnLan service is probably to use [NSSM](https://nssm.cc/) (the Non-Sucking Service Manager).
+The Sleep-On-Lan process may be run manually or, for convenience, installed as a service. The easiest way to install the Sleep-On-Lan service is probably to use [NSSM](https://nssm.cc/) (the Non-Sucking Service Manager).
 
 Usage :
 
@@ -160,19 +170,19 @@ Usage :
 
 Installation example :
 
-<pre>c:\Tools\nssm\2.24\win64\nssm.exe install SleepOnLan c:\Tools\SleepOnLan\sol.exe
+<pre>c:\Tools\nssm\2.24\win64\nssm.exe install Sleep-On-Lan c:\Tools\Sleep-On-Lan\sol.exe
 </pre>
 
 Removal example : 
 
-<pre>c:\Tools\nssm\2.24\win64\nssm.exe remove SleepOnLan confirm
+<pre>c:\Tools\nssm\2.24\win64\nssm.exe remove Sleep-On-Lan confirm
 </pre>
 
 Reference : [nssm](https://nssm.cc/usage)
 
 ### Under Linux
 
-The SleepOnLan process must use (usually) port 9 (see configuration section if you need another port or if you need to listen to several UDP ports).
+The Sleep-On-Lan process must use (usually) port 9 (see configuration section if you need another port or if you need to listen to several UDP ports).
 
 Thus the process has either to be ran as root, either has to have the authorization to start on ports < 1024.
 
@@ -185,6 +195,33 @@ nohup /path/to/sol_binary &gt; /var/log/sleep-on-lan.log 2&gt;&1 &
 You may of course daemonize the process or launch it through an external monitor (like [monit](http://mmonit.com/monit/) or [supervisor](http://supervisord.org/introduction.html)).
 
 ## Miscellaneous
+
+### Logs
+
+Expected logs when starting the process should be : 
+
+```
+INFO: 2021/06/28 21:44:40 configuration.go:67: Configuration file found under [/root/sleep-on-lan/bin/linux/sol.json], now reading content
+INFO: 2021/06/28 21:44:40 configuration.go:137: Avoid dual UDP sending enabled, delay is [100ms]
+INFO: 2021/06/28 21:44:40 sol.go:20: Application [sleep-on-lan], version [1.0.5-SNAPSHOT]
+INFO: 2021/06/28 21:44:40 sol.go:23: Now starting sleep-on-lan, hardware IP/mac addresses are : 
+INFO: 2021/06/28 21:44:40 sol.go:25:  - local IP adress [172.17.0.1/16], mac [02:42:76:c9:83:15]
+INFO: 2021/06/28 21:44:40 sol.go:25:  - local IP adress [127.0.0.1/8], mac []
+INFO: 2021/06/28 21:44:40 sol.go:25:  - local IP adress [192.168.8.4/24], mac [bc:5f:f4:2b:df:2b]
+INFO: 2021/06/28 21:44:40 sol.go:25:  - local IP adress [172.18.0.1/16], mac [02:42:24:cc:5a:56]
+INFO: 2021/06/28 21:44:40 sol.go:28: Available commands are : 
+INFO: 2021/06/28 21:44:40 sol.go:30:  - operation [sleep], command [pm-suspend], default [true], type [external]
+INFO: 2021/06/28 21:44:40 listener_udp.go:15: Now listening UDP packets on port [9]
+INFO: 2021/06/28 21:44:40 listener_http.go:157: HTTP starting on port [8009], without auth
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/]
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/sleep]
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/quit]
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/state/local/online]
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/state/local]
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/state/ip/:ip]
+INFO: 2021/06/28 21:44:40 listener_http.go:85: Registering route [/wol/:mac]
+INFO: 2021/06/28 21:44:40 listener_udp.go:15: Now listening UDP packets on port [7]
+```
 
 ### Standalone sleep on lan under windows
 
