@@ -18,31 +18,29 @@ endif
 .PHONY: install clean deploy run 
 
 build:
-	cd /go/src/
-	go install main/go/sol/
+	go install sleep-on-lan
 
 clean:
 	rm -rf bin
 
 conf:
-	cp /go/src/main/resources/sol.json /go/bin/
+	cp resources/sol.json bin/
 
 run:
 	bin/sol
 
 distribution: install
-	mkdir /go/bin/linux/ 
-	mv /go/bin/sol /go/bin/linux
-	cp /go/src/main/resources/sol.json /go/bin/linux/ 
-	cp /go/src/main/resources/sol.json /go/bin/windows_amd64/
-	cp /go/src/script/*.bat /go/bin/windows_amd64
-	cd /go/bin/ ; zip -r -9 ${PACKAGE}.zip ./linux ; zip -r -9 ${PACKAGE}.zip ./windows_amd64
+	mkdir bin/linux/ 
+	mv bin/sol bin/linux
+	cp resources/sol.json bin/linux/ 
+	cp resources/sol.json bin/windows_amd64/
+	cp resources/script/*.bat bin/windows_amd64
+	cd bin/ ; zip -r -9 ${PACKAGE}.zip ./linux ; zip -r -9 ${PACKAGE}.zip ./windows_amd64
 
 install: clean
-	rm -rf /go/bin
-	cd /go/src
-	GOARCH=amd64 GOOS=windows go install main/go/sol/
-	GOARCH=amd64 GOOS=linux go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo main/go/sol/
+	rm -rf bin
+	GOARCH=amd64 GOOS=windows go install sleep-on-lan
+	GOARCH=amd64 GOOS=linux go install -ldflags "-d -s -w -X tensin.org/watchthatpage/core.Build=`git rev-parse HEAD`" -a -tags netgo -installsuffix netgo sleep-on-lan
 
 docker:
 	docker run --rm -it -v ${PWD}:/go ${DOCKER_IMAGE} /bin/bash
