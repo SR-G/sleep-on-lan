@@ -9,42 +9,41 @@ import (
 )
 
 const (
-	COMMAND_TYPE_EXTERNAL = "external"
+	COMMAND_TYPE_EXTERNAL     = "external"
 	COMMAND_TYPE_INTERNAL_DLL = "internal-dll"
 )
 
 type Configuration struct {
-	Listeners   []string // what is read from the sol.json configuration file
-	LogLevel    string
-	BroadcastIP string
-	Commands    []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
-	Auth		AuthConfiguration  // optional
-	HTTPOutput  string
+	Listeners           []string // what is read from the sol.json configuration file
+	LogLevel            string
+	BroadcastIP         string
+	Commands            []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
+	Auth                AuthConfiguration      // optional
+	HTTPOutput          string
 	AvoidDualUDPSending AvoidDualUDPSendingConfiguration
 
 	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners
 }
 
 type AvoidDualUDPSendingConfiguration struct {
-	AvoidDualUDPSendingActive bool `json:"Active"`
-	AvoidDualUDPSendingDelay string `json:"Delay"`
+	AvoidDualUDPSendingActive bool   `json:"Active"`
+	AvoidDualUDPSendingDelay  string `json:"Delay"`
 }
 
-
 type AuthConfiguration struct {
-	Login 		string `json:"Login"`
-	Password	string `json:"Password"`
+	Login    string `json:"Login"`
+	Password string `json:"Password"`
 }
 
 func (a AuthConfiguration) isEmpty() bool {
-    return a.Login == "" && a.Password == ""
+	return a.Login == "" && a.Password == ""
 }
 
 type CommandConfiguration struct {
-	Operation    string `json:"Operation"`
-	Command      string `json:"Command"`
-	IsDefault    bool   `json:"Default"`
-	CommandType  string `json:"Type"`
+	Operation   string `json:"Operation"`
+	Command     string `json:"Command"`
+	IsDefault   bool   `json:"Default"`
+	CommandType string `json:"Type"`
 }
 
 type ListenerConfiguration struct {
@@ -58,7 +57,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.LogLevel = "INFO"
 	conf.BroadcastIP = "192.168.255.255"
 	conf.HTTPOutput = "XML"
-	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{ AvoidDualUDPSendingActive: false, AvoidDualUDPSendingDelay: "100ms" }
+	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{AvoidDualUDPSendingActive: false, AvoidDualUDPSendingDelay: "100ms"}
 	// default commands are registered on Parse() method, depending on the current operating system
 }
 
@@ -126,15 +125,15 @@ func (conf *Configuration) Parse() {
 	// Set type to external if not provided
 	for idx, _ := range conf.Commands {
 		command := &conf.Commands[idx]
-		if command.CommandType == ""  {
+		if command.CommandType == "" {
 			Info.Println("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
 	}
 
 	// Avoid dual UDP sending
-	if (conf.AvoidDualUDPSending.AvoidDualUDPSendingActive) {
-		Info.Println("Avoid dual UDP sending enabled, delay is ["  + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
+	if conf.AvoidDualUDPSending.AvoidDualUDPSendingActive {
+		Info.Println("Avoid dual UDP sending enabled, delay is [" + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
 	} else {
 		Info.Println("Avoid dual UDP sending not enabled")
 	}

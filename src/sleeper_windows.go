@@ -1,15 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
-	"fmt"
 
 	winio "github.com/Microsoft/go-winio"
 )
 
 const (
-	DEFAULT_COMMAND_SLEEP = "sleep"
+	DEFAULT_COMMAND_SLEEP    = "sleep"
 	DEFAULT_COMMAND_SHUTDOWN = "shutdown"
 )
 
@@ -26,7 +26,7 @@ func ExecuteCommand(Command CommandConfiguration) {
 			sleepDLLImplementation()
 		} else if Command.Operation == DEFAULT_COMMAND_SHUTDOWN {
 			shutdownDLLImplementation()
-		}		
+		}
 	} else if Command.CommandType == COMMAND_TYPE_EXTERNAL {
 		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
 		sleepCommandLineImplementation(Command.Command)
@@ -64,13 +64,13 @@ func sleepDLLImplementation() {
 
 func shutdownDLLImplementation() {
 	// SeShutdownPrivilege
-	err := winio.RunWithPrivilege("SeShutdownPrivilege", func() error { 
+	err := winio.RunWithPrivilege("SeShutdownPrivilege", func() error {
 		var mod = syscall.NewLazyDLL("Advapi32.dll")
 		var proc = mod.NewProc("InitiateSystemShutdownW")
-		
+
 		// DLL API : public static extern bool InitiateSystemShutdown(string lpMachineName, string lpMessage, int dwTimeout, bool bForceAppsClosed, bool bRebootAfterShutdown);
 		// ex. : uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("Done Title"))),
-		
+
 		// var a [1]byte
 		// a[0] = byte(0)
 		// addrPtr := unsafe.Pointer(&a)
@@ -82,10 +82,10 @@ func shutdownDLLImplementation() {
 			uintptr(0)) // bRebootAfterShutdown
 
 		// ret 0 = false, ret 1 = true = success
-		Info.Printf("Command executed, result code [" + fmt.Sprint(ret) + "]")			
-		return nil 
+		Info.Printf("Command executed, result code [" + fmt.Sprint(ret) + "]")
+		return nil
 	})
 	if err != nil {
 		Error.Printf("Can't execute command")
-	}	
+	}
 }
