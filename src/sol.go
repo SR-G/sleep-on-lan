@@ -51,7 +51,7 @@ func main() {
 	// Display found IP/MAC
 	Info.Println("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
 	for key, value := range LocalNetworkMap() {
-		Info.Println(" - local IP adress [" + key + "], mac [" + value + "]")
+		Info.Println(" - local IP adress [" + key + "], mac [" + value + "], reversed mac [" + ReverseMacAddress(value) + "]")
 	}
 
 	// Display commands found in configuration

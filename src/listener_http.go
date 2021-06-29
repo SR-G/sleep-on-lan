@@ -122,15 +122,6 @@ func pingIp(ip string) *RestStateResult {
 	return result
 }
 
-func reverseMacAddress(address string) string {
-	tokens := strings.Split(address, ":")
-	last := len(tokens) - 1
-	for i := 0; i < len(tokens)/2; i++ {
-		tokens[i], tokens[last-i] = tokens[last-i], tokens[i]
-	}
-	return strings.Join(tokens, ":")
-}
-
 func executeCommandWithDelay(availableCommand CommandConfiguration) {
 	time.Sleep(250 * time.Millisecond)
 	ExecuteCommand(availableCommand)
@@ -184,7 +175,7 @@ func ListenHTTP(port int) {
 		}
 		sort.Strings(ips)
 		for _, ip := range ips {
-			result.Hosts.Hosts = append(result.Hosts.Hosts, RestResultHost{Ip: ip, MacAddress: interfaces[ip], ReversedMacAddress: reverseMacAddress(interfaces[ip])})
+			result.Hosts.Hosts = append(result.Hosts.Hosts, RestResultHost{Ip: ip, MacAddress: interfaces[ip], ReversedMacAddress: ReverseMacAddress(interfaces[ip])})
 		}
 		for _, listenerConfiguration := range configuration.listenersConfiguration {
 			result.Listeners.Listeners = append(result.Listeners.Listeners, RestResultListenerConfiguration{Type: listenerConfiguration.nature, Port: listenerConfiguration.port, Active: listenerConfiguration.active})
