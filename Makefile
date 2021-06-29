@@ -44,6 +44,10 @@ distribution: install
 	cp resources/script/*.bat bin/windows_amd64
 	cd bin/ ; zip -r -9 ${PACKAGE}.zip ./linux/ ; zip -r -9 ${PACKAGE}.zip ./windows_amd64/ ; zip -r -9 ${PACKAGE}.zip ./windows_386/
 
+format:
+	cd src/
+	gofmt -w .
+
 install: clean
 	cd src/
 	GOARCH=386 GOOS=windows go install sleep-on-lan
