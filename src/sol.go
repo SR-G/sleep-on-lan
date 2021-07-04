@@ -11,6 +11,12 @@ import (
 var configuration = Configuration{}
 var configurationFileName = "sol.json"
 var configurationFileNameFromCommandLine string
+var exit chan bool
+
+func ExitDaemon() {
+	Info.Println("Stopping daemon ...")
+	exit <- true
+}
 
 func init() {
 	// Init flag reader
@@ -23,6 +29,9 @@ func init() {
 
 	// Init loggers
 	PreInitLoggers()
+
+	// Init channel allowing to exit when listeners can't be started
+	exit = make(chan bool)
 }
 
 func main() {
@@ -71,6 +80,9 @@ func main() {
 		}
 	}
 
-	// Blocks forever
-	select {}
+	// Blocks forever ... excepted if there are some start errors (depending on configuration)
+	select {
+	case <-exit:
+		return
+	}
 }

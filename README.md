@@ -51,6 +51,7 @@ Content is as follow (everything is optional / below is the whole structure) :
       "Login" : "myusername",
       "Password" : "mypassword"
   },
+  "ExitIfAnyPortIsAlreadyUsed" : false,
   "AvoidDualUDPSending" : {
           "Active": true,
           "Delay": "100ms"
@@ -96,6 +97,8 @@ Default output from REST command is `XML` but may be switched from a configurati
 **LogLevel** defines the log level to use. Available values are NONE|OFF, DEBUG, INFO, WARN|WARNING, ERROR. Logs are just written to the stderr/stdout outputs.
 
 **BroadcastIP** defines the broadcast IP used by the /wol service. By default the IP used is 192.168.255.255 (local network range).
+
+**ExitIfAnyPortIsAlreadyUsed** if `true`, the daemon will stop if any port can't be started, whereas if `false` (which is the default), it will continue to start (you may be willing the daemon to be running even if one listener is not startable).
 
 **AvoidDualUDPSending** to activate one internal mechanizm allowing a small delay before executing commands. This may allow dual UDP sent by some clients to be discarded, instead of being executed twice. False by default. Delay (if feature is enabled) is 100ms by default (can be overriden to something like "1s", ...)
 

@@ -20,7 +20,13 @@ func ListenUDP(port int) {
 	}
 	sock, err := net.ListenUDP("udp", addr)
 	if err != nil {
-		Error.Println("Error while starting listening :", err.Error())
+		if configuration.ExitIfAnyPortIsAlreadyUsed {
+			Error.Println("Error while starting listening (will exit, per configuration) :", err.Error())
+			exit <- true
+			return
+		} else {
+			Error.Println("Error while starting listening (program will however continue) :", err.Error())
+		}
 	}
 	for {
 		rlen, remote, err := sock.ReadFromUDP(buf[:])

@@ -14,15 +14,16 @@ const (
 )
 
 type Configuration struct {
-	Listeners           []string // what is read from the sol.json configuration file
-	LogLevel            string
-	BroadcastIP         string
-	Commands            []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
-	Auth                AuthConfiguration      // optional
-	HTTPOutput          string
-	AvoidDualUDPSending AvoidDualUDPSendingConfiguration
+	Listeners                  []string // what is read from the sol.json configuration file
+	LogLevel                   string
+	BroadcastIP                string
+	ExitIfAnyPortIsAlreadyUsed bool
+	Commands                   []CommandConfiguration // the various defined commands. Will be enhanded with default operation if empty from configuration
+	Auth                       AuthConfiguration      // optional
+	HTTPOutput                 string
+	AvoidDualUDPSending        AvoidDualUDPSendingConfiguration
 
-	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners
+	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners (= internal representation, not an external configuration)
 }
 
 type AvoidDualUDPSendingConfiguration struct {
@@ -57,6 +58,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.LogLevel = "INFO"
 	conf.BroadcastIP = "192.168.255.255"
 	conf.HTTPOutput = "XML"
+	conf.ExitIfAnyPortIsAlreadyUsed = false
 	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{AvoidDualUDPSendingActive: false, AvoidDualUDPSendingDelay: "100ms"}
 	// default commands are registered on Parse() method, depending on the current operating system
 }
@@ -129,6 +131,13 @@ func (conf *Configuration) Parse() {
 			Info.Println("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
+	}
+
+	// Stop policy
+	if conf.ExitIfAnyPortIsAlreadyUsed {
+		Info.Println("Daemon will stop if any listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
+	} else {
+		Info.Println("Daemon won't stop even if one listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
 	}
 
 	// Avoid dual UDP sending

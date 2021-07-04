@@ -1,6 +1,7 @@
 {
   "Listeners" : ["UDP:9", "UDP:7", "HTTP:8009" ],
   "LogLevel" : "INFO",
+  "ExitIfAnyPortIsAlreadyUsed" : true,
   "AvoidDualUDPSending" : {
 	  "Active": false,
 	  "Delay": "100ms"

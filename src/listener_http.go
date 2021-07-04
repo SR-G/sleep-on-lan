@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"net/http"
-	"os"
+	// "os"
 	"sort"
 	"strconv"
 	"strings"
@@ -90,12 +90,22 @@ func dumpRoute(route string) {
 // }
 
 func renderResult(c echo.Context, status int, result interface{}) error {
+	// c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationXMLCharsetUTF8) // echo.MIMETextXMLCharsetUTF8)
+
+	// Return status cope
+	c.Response().WriteHeader(status)
+
+	// Proper formatting per what is expected in the query
 	format := c.QueryParam("format")
 	if strings.EqualFold(configuration.HTTPOutput, "JSON") || strings.EqualFold(format, "JSON") {
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 		return c.JSONPretty(status, result, "  ")
 	} else {
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextXMLCharsetUTF8)
 		return c.XMLPretty(status, result, "  ")
 	}
+	// c.Response().Write(b)
+	// c.Response().Flush()
 }
 
 func pingIp(ip string) *RestStateResult {
@@ -122,10 +132,12 @@ func pingIp(ip string) *RestStateResult {
 	return result
 }
 
+/*
 func executeCommandWithDelay(availableCommand CommandConfiguration) {
 	time.Sleep(250 * time.Millisecond)
 	ExecuteCommand(availableCommand)
 }
+*/
 
 func ListenHTTP(port int) {
 	// externalIp, _ := ExternalIP()
@@ -133,8 +145,8 @@ func ListenHTTP(port int) {
 	// Info.Println("Now listening HTTP on port [" + strconv.Itoa(port) + "], urls will be : ")
 	/*
 		for key, value := range routes {
-			Info.Println(" - " + baseExternalUrl + key)
-		}
+						Info.Println(" - " + baseExternalUrl + key)
+								}
 	*/
 
 	e := echo.New()
@@ -204,7 +216,7 @@ func ListenHTTP(port int) {
 				availableCommand := configuration.Commands[idx]
 				if availableCommand.Operation == operation {
 					Info.Println("Executing [" + operation + "]")
-					go executeCommandWithDelay(availableCommand)
+					defer ExecuteCommand(availableCommand)
 					break
 				}
 			}
@@ -218,15 +230,9 @@ func ListenHTTP(port int) {
 			Operation: "quit",
 			Result:    true,
 		}
-		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextXMLCharsetUTF8)
-		// c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationXMLCharsetUTF8) // echo.MIMETextXMLCharsetUTF8)
-		c.Response().WriteHeader(http.StatusOK)
-		b, _ := xml.Marshal(result)
-		c.Response().Write(b)
-		c.Response().Flush()
-		defer os.Exit(1)
-		return nil
-		// return c.XMLPretty(http.StatusOK, result, "  ")
+		defer ExitDaemon()
+		return renderResult(c, http.StatusOK, result)
+
 	})
 
 	dumpRoute("state/local/online")
@@ -253,11 +259,10 @@ func ListenHTTP(port int) {
 	/*
 		dumpRoute("state/mac/:mac")
 		e.GET("/state/ip/:ip", func(c echo.Context) error {
-			mac := c.Param("mac")
-			ip := retrieveIpFromMac(mac)
-			result := pingIp(ip)
-			return c.XMLPretty(http.StatusOK, result, "  ")
-		})
+		mac := c.Param("mac")
+		ip := retrieveIpFromMac(mac)
+		result := pingIp(ip)
+		return c.XMLPretty(http.StatusOK, result, "  ")
 	*/
 
 	dumpRoute("wol/:mac")
@@ -279,5 +284,16 @@ func ListenHTTP(port int) {
 	})
 
 	// localIp := "0.0.0.0"
-	Info.Println(e.Start(":" + strconv.Itoa(port)))
+	// Info.Println(e.Start(":" + strconv.Itoa(port)))
+	err := e.Start(":" + strconv.Itoa(port))
+	if err != nil {
+		if configuration.ExitIfAnyPortIsAlreadyUsed {
+			Error.Println("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be stopped, per configuration) : " + err.Error())
+			defer ExitDaemon()
+		} else {
+			Error.Println("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be continue) : " + err.Error())
+		}
+	} else {
+		Info.Println("HTTP listener on port [" + strconv.Itoa(port) + "] correctly started")
+	}
 }
