@@ -82,7 +82,7 @@ type RestStateResult struct {
 }
 
 func dumpRoute(route string) {
-	Info.Println("Registering route [/" + route + "]")
+	Info.Println("Registering route [" + colorer.Green("/" + route) + "]")
 }
 
 // func retrieveIpFromMac(mac strinc) string {
@@ -157,9 +157,9 @@ func ListenHTTP(port int) {
 	// e.Use(middleware.Gzip())
 
 	if configuration.Auth.isEmpty() {
-		Info.Println("HTTP starting on port [" + strconv.Itoa(port) + "], without auth")
+		Info.Println("HTTP starting on port [" + colorer.Green(strconv.Itoa(port)) + "], without auth")
 	} else {
-		Info.Println("HTTP starting on port [" + strconv.Itoa(port) + "], with auth activated : login [" + configuration.Auth.Login + "], password [" + strings.Repeat("*", len(configuration.Auth.Password)) + "]")
+		Info.Println("HTTP starting on port [" + colorer.Green(strconv.Itoa(port)) + "], with auth activated : login [" + configuration.Auth.Login + "], password [" + strings.Repeat("*", len(configuration.Auth.Password)) + "]")
 		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 			if username == configuration.Auth.Login && password == configuration.Auth.Password {
 				return true, nil

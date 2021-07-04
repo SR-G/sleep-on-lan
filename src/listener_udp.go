@@ -12,7 +12,7 @@ type MagicPacket []byte
 var isActionInProgress bool = false
 
 func ListenUDP(port int) {
-	Info.Println("Now listening UDP packets on port [" + strconv.Itoa(port) + "]")
+	Info.Println("Now listening UDP packets on port [" + colorer.Green(strconv.Itoa(port)) + "]")
 	var buf [1024]byte
 	addr, err := net.ResolveUDPAddr("udp", ":"+strconv.Itoa(port))
 	if err != nil {

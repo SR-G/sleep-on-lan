@@ -6,12 +6,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+		"github.com/labstack/gommon/color"
 )
 
 var configuration = Configuration{}
 var configurationFileName = "sol.json"
 var configurationFileNameFromCommandLine string
 var exit chan bool
+var colorer *color.Color
 
 func ExitDaemon() {
 	Info.Println("Stopping daemon ...")
@@ -27,6 +29,9 @@ func init() {
 	flaggy.SetVersion(Version.Version())
 	flaggy.Parse()
 
+	// Colors ...
+	colorer = color.New()
+
 	// Init loggers
 	PreInitLoggers()
 
@@ -41,10 +46,10 @@ func main() {
 
 	if configurationFileNameFromCommandLine != "" {
 		if _, err := os.Stat(configurationFileNameFromCommandLine); err == nil {
-			Info.Println("Will use configuration file provided through --config parameter, path is [" + configurationFileNameFromCommandLine + "]")
+			Info.Println("Will use configuration file provided through --config parameter, path is [" + colorer.Green(configurationFileNameFromCommandLine) + "]")
 			fullConfigurationFileName = configurationFileNameFromCommandLine
 		} else {
-			Warning.Println("Configuration file provided through --config parameter not found on disk, path is [" + configurationFileNameFromCommandLine + "], will try default value")
+			Warning.Println("Configuration file provided through --config parameter not found on disk, path is [" + colorer.Red(configurationFileNameFromCommandLine) + "], will try default value")
 			fullConfigurationFileName = dir + string(os.PathSeparator) + configurationFileName
 		}
 	} else {
@@ -55,12 +60,12 @@ func main() {
 	configuration.InitDefaultConfiguration()
 	configuration.Load(fullConfigurationFileName)
 	configuration.Parse()
-	Info.Println("Application [" + Version.ApplicationName + "], version [" + Version.Version() + "]")
+	Info.Println("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.Version()) + "]")
 
 	// Display found IP/MAC
 	Info.Println("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
 	for key, value := range LocalNetworkMap() {
-		Info.Println(" - local IP adress [" + key + "], mac [" + value + "], reversed mac [" + ReverseMacAddress(value) + "]")
+		Info.Println(" - local IP adress [" + colorer.Green(key) + "], mac [" + colorer.Green(value) + "], reversed mac [" + colorer.Green(ReverseMacAddress(value)) + "]")
 	}
 
 	// Display commands found in configuration
