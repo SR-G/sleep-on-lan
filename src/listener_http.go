@@ -284,16 +284,12 @@ func ListenHTTP(port int) {
 	})
 
 	// localIp := "0.0.0.0"
-	// Info.Println(e.Start(":" + strconv.Itoa(port)))
-	err := e.Start(":" + strconv.Itoa(port))
-	if err != nil {
+	if err := e.Start(":" + strconv.Itoa(port)) ; err != http.ErrServerClosed {
 		if configuration.ExitIfAnyPortIsAlreadyUsed {
 			Error.Println("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be stopped, per configuration) : " + err.Error())
 			defer ExitDaemon()
 		} else {
 			Error.Println("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be continue) : " + err.Error())
 		}
-	} else {
-		Info.Println("HTTP listener on port [" + strconv.Itoa(port) + "] correctly started")
 	}
 }
