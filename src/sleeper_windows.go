@@ -10,20 +10,25 @@ import (
 
 const (
 	DEFAULT_COMMAND_SLEEP    = "sleep"
+	DEFAULT_COMMAND_HIBERNATE = "hibernate"
 	DEFAULT_COMMAND_SHUTDOWN = "shutdown"
 )
 
 func RegisterDefaultCommand() {
 	defaultSleepCommand := CommandConfiguration{Operation: DEFAULT_COMMAND_SLEEP, CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: true}
+	defaultHibernateCommand := CommandConfiguration{Operation: DEFAULT_COMMAND_HIBERNATE, CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: false}
 	defaultShutdownCommand := CommandConfiguration{Operation: DEFAULT_COMMAND_SHUTDOWN, CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: false}
-	configuration.Commands = []CommandConfiguration{defaultSleepCommand, defaultShutdownCommand}
+	configuration.Commands = []CommandConfiguration{defaultSleepCommand, defaultHibernateCommand, defaultShutdownCommand}
 }
 
 func ExecuteCommand(Command CommandConfiguration) {
 	if Command.CommandType == COMMAND_TYPE_INTERNAL_DLL {
 		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "]")
 		if Command.Operation == DEFAULT_COMMAND_SLEEP {
-			sleepDLLImplementation()
+			sleepDLLImplementation(0)
+		} else if Command.Operation == DEFAULT_COMMAND_HIBERNATE {
+			sleepDLLImplementation(1)
+		}
 		} else if Command.Operation == DEFAULT_COMMAND_SHUTDOWN {
 			shutdownDLLImplementation()
 		}
@@ -48,16 +53,16 @@ func sleepCommandLineImplementation(cmd string) {
 	}
 }
 
-func sleepDLLImplementation() {
+func sleepDLLImplementation(state int) {
 	var mod = syscall.NewLazyDLL("Powrprof.dll")
 	var proc = mod.NewProc("SetSuspendState")
 
 	// DLL API : public static extern bool SetSuspendState(bool hiberate, bool forceCritical, bool disableWakeEvent);
 	// ex. : uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("Done Title"))),
-	ret, _, _ := proc.Call(0,
-		uintptr(0), // hibernate
-		uintptr(1), // forceCritical
-		uintptr(1)) // disableWakeEvent
+	ret, _, _ := proc.Call(
+		uintptr(state), // hibernate
+		uintptr(0), // forceCritical
+		uintptr(0)) // disableWakeEvent
 
 	Info.Printf("Command executed, result code [" + fmt.Sprint(ret) + "]")
 }
@@ -74,9 +79,9 @@ func shutdownDLLImplementation() {
 		// var a [1]byte
 		// a[0] = byte(0)
 		// addrPtr := unsafe.Pointer(&a)
-		ret, _, _ := proc.Call(0,
-			uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(""))), // lpMachineName
-			uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(""))), // lpMessage
+		ret, _, _ := proc.Call(
+			uintptr(0), // lpMachineName
+			uintptr(0), // lpMessage
 			uintptr(0), // dwTimeout
 			uintptr(1), // bForceAppsClosed
 			uintptr(0)) // bRebootAfterShutdown
