@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"syscall"
-	"unsafe"
+	// "unsafe"
 
 	winio "github.com/Microsoft/go-winio"
 )
@@ -28,7 +28,6 @@ func ExecuteCommand(Command CommandConfiguration) {
 			sleepDLLImplementation(0)
 		} else if Command.Operation == DEFAULT_COMMAND_HIBERNATE {
 			sleepDLLImplementation(1)
-		}
 		} else if Command.Operation == DEFAULT_COMMAND_SHUTDOWN {
 			shutdownDLLImplementation()
 		}
