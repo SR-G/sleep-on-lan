@@ -71,7 +71,7 @@ func main() {
 	// Display commands found in configuration
 	Info.Println("Available commands are : ")
 	for _, command := range configuration.Commands {
-		Info.Println(" - operation [" + command.Operation + "], command [" + command.Command + "], default [" + strconv.FormatBool(command.IsDefault) + "], type [" + command.CommandType + "]")
+		Info.Println(" - operation [" + color.Green(command.Operation) + "], command [" + color.Green(command.Command) + "], default [" + color.Green(strconv.FormatBool(command.IsDefault)) + "], type [" + color.Green(command.CommandType) + "]")
 	}
 
 	// Starts listeners, per configuration
