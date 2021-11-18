@@ -27,28 +27,29 @@ func ListenUDP(port int) {
 		} else {
 			logger.Errorf("Error while starting listening (program will however continue) :", err.Error())
 		}
-	}
-	for {
-		rlen, remote, err := sock.ReadFromUDP(buf[:])
-		if err != nil {
-			logger.Errorf("Error while reading :", err.Error())
-		}
-		extractedMacAddress, _ := extractMacAddress(rlen, buf)
-		logger.Infof("Received a MAC address from IP [" + remote.String() + "], extracted mac [" + extractedMacAddress.String() + "]")
-		if matchAddress(extractedMacAddress) {
-			logger.Infof("(reversed) received MAC address match a local address")
-			if configuration.AvoidDualUDPSending.AvoidDualUDPSendingActive {
-				// Specific behavior : let's try to avoid dual UDP sending
-				if !isActionInProgress {
-					isActionInProgress = true
-					logger.Infof("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
-					go doActionWithDelay()
+	} else {
+		for {
+			rlen, remote, err := sock.ReadFromUDP(buf[:])
+			if err != nil {
+				logger.Errorf("Error while reading :", err.Error())
+			}
+			extractedMacAddress, _ := extractMacAddress(rlen, buf)
+			logger.Infof("Received a MAC address from IP [" + remote.String() + "], extracted mac [" + extractedMacAddress.String() + "]")
+			if matchAddress(extractedMacAddress) {
+				logger.Infof("(reversed) received MAC address match a local address")
+				if configuration.AvoidDualUDPSending.AvoidDualUDPSendingActive {
+					// Specific behavior : let's try to avoid dual UDP sending
+					if !isActionInProgress {
+						isActionInProgress = true
+						logger.Infof("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
+						go doActionWithDelay()
+					} else {
+						logger.Infof("Another command is already awaiting, rejecting this one due to dual UDP sending avoidance being activated")
+					}
 				} else {
-					logger.Infof("Another command is already awaiting, rejecting this one due to dual UDP sending avoidance being activated")
+					// Regular behavior, let's just execute command
+					doAction()
 				}
-			} else {
-				// Regular behavior, let's just execute command
-				doAction()
 			}
 		}
 	}
