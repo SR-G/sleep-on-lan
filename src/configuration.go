@@ -68,9 +68,11 @@ func (conf *Configuration) Load(configurationFileName string) {
 		Info.Println("Configuration file found under [" + colorer.Green(configurationFileName) + "], now reading content")
 		file, _ := os.Open(configurationFileName)
 		decoder := json.NewDecoder(file)
+		decoder.DisallowUnknownFields()
 		err := decoder.Decode(&conf)
 		if err != nil {
 			Error.Println("error while loading configuration :", err)
+			defer ExitDaemon()
 		}
 	} else {
 		Info.Println("No external configuration file found under [" + colorer.Red(configurationFileName) + "], will use default values")

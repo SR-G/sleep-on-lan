@@ -4,7 +4,7 @@ SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 BINARY=sol
 PWD := $(shell pwd)
 
-VERSION=1.0.6-SNAPSHOT
+VERSION=1.0.7-SNAPSHOT
 PACKAGE=SleepOnLAN-${VERSION}
 BUILD_TIME=$(date "%FT%T%z")
 
@@ -31,7 +31,8 @@ conf:
 	cp resources/sol.json bin/
 
 run:
-	${GOPATH}/bin/sleep-on-lan
+	setcap 'cap_net_bind_service=+ep' ${GOPATH}/bin/sleep-on-lan
+	${GOPATH}/bin/sleep-on-lan -c resources/dev/sol-local-development-configuration.HS-soft-error.json
 
 distribution: install
 	mkdir -p bin/linux/ bin/windows_amd64/ bin/windows_386/
