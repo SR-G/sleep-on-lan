@@ -41,9 +41,9 @@ http://127.0.0.1:8009/wol/c4:d9:87:7a:78:35          // sends a wake-on-lan magi
 
 An optional configuration file may be used.
 
-Taken automatically in account if named `sol.json` and located in the same folder than the Sleep-On-Lan binary. Or can be manually configured at launch time with the `--config` parameter.
+Taken automatically in account if named `sol.json` and located in the same folder than the Sleep-On-Lan binary. Or can be manually configured at launch time with the `--config` parameter. See [configuration examples](resources/configuration/default/).
 
-Content is as follow (everything is optional / below is the whole structure) :
+Content of configuration is as follow (everything is optional / below is the whole structure) :
 
 <pre>{
   "Listeners" : ["UDP:9", "HTTP:8009" ],

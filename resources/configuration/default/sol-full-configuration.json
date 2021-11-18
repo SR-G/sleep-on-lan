@@ -1,0 +1,19 @@
+{
+    "Listeners": [
+        "UDP:9",
+        "HTTP:8009"
+    ],
+    "LogLevel": "INFO",
+    "BroadcastIP": "192.168.255.255",
+    "ExitIfAnyPortIsAlreadyUsed": false,
+    "Commands": null,
+    "Auth": {
+        "Login": "",
+        "Password": ""
+    },
+    "HTTPOutput": "XML",
+    "AvoidDualUDPSending": {
+        "Active": false,
+        "Delay": "100ms"
+    }
+}
