@@ -185,6 +185,8 @@ Reference : [nssm](https://nssm.cc/usage)
 
 ### Under Linux
 
+#### Port & rights on processes
+
 The Sleep-On-Lan process must use (usually) port 9 (see configuration section if you need another port or if you need to listen to several UDP ports).
 
 Thus the process has either to be ran as root, either has to have the authorization to start on ports < 1024.
@@ -195,7 +197,35 @@ The following example allows the process to run on ports &lt; 1024 on recent Lin
 nohup /path/to/sol_binary &gt; /var/log/sleep-on-lan.log 2&gt;&1 &
 </pre>
 
-You may of course daemonize the process or launch it through an external monitor (like [monit](http://mmonit.com/monit/) or [supervisor](http://supervisord.org/introduction.html)).
+#### Daemonization
+
+You may of course daemonize the process or launch it through an external monitor : 
+- [monit](http://mmonit.com/monit/) 
+- [supervisor](http://supervisord.org/introduction.html)
+- [systemctl](https://www.freedesktop.org/software/systemd/man/systemctl.html)
+  1. Create the file `/etc/systemd/system/sleep-on-lan.service` with the following content (adjust the path accordingly to your installation)
+      ```
+      [Unit]
+      Description=Sleep-On-LAN daemon
+
+      [Service]
+      User=root
+      WorkingDirectory=/home/applications/sleep-on-lan
+      ExecStart=/home/applications/sleep-on-lan/sol
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+      ```
+  2. Refresh configuration, activate service at runtime and start it : 
+      ```bash
+      systemctl daemon-reload
+      systemctl enable sleep-on-lan.service
+      systemctl start sleep-on-lan.service
+      ```
+  3. Logs are then found in a regular way inside `journalctl` (`journalctl -xe`, ...)
+
+
 
 ## Miscellaneous
 
