@@ -7,10 +7,10 @@ func RegisterDefaultCommand() {
 
 func ExecuteCommand(Command CommandConfiguration) {
 	if Command.CommandType == COMMAND_TYPE_EXTERNAL {
-		Info.Println("Executing operation [" + Command.Operation + "], type [" + Command.Command + "], command [" + Command.Command + "]")
+		logger.Infof("Executing operation [" + Command.Operation + "], type [" + Command.Command + "], command [" + Command.Command + "]")
 		sleepCommandLineImplementation(Command.Command)
 	} else {
-		Info.Println("Unknown command type [" + Command.CommandType + "]")
+		logger.Infof("Unknown command type [" + Command.CommandType + "]")
 	}
 }
 
@@ -18,11 +18,11 @@ func sleepCommandLineImplementation(cmd string) {
 	if cmd == "" {
 		cmd = "pm-suspend"
 	}
-	Info.Println("Sleep implementation [linux], sleep command is [" + cmd + "]")
+	logger.Infof("Sleep implementation [linux], sleep command is [" + cmd + "]")
 	_, _, err := Execute(cmd)
 	if err != nil {
-		Error.Println("Can't execute command [" + cmd + "] : " + err.Error())
+		logger.Errorf("Can't execute command [" + cmd + "] : " + err.Error())
 	} else {
-		Info.Println("Command correctly executed")
+		logger.Infof("Command correctly executed")
 	}
 }

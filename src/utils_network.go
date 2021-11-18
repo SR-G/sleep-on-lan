@@ -49,7 +49,7 @@ func ExternalIP() (string, error) {
 func GetInterfaces() []net.Interface {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		Error.Println("Unable to get interfaces : " + err.Error())
+		logger.Errorf("Unable to get interfaces : " + err.Error())
 	}
 	return interfaces
 }
@@ -113,8 +113,8 @@ func LocalNetworkMap() map[string]string {
 		for _, addr := range addresses {
 			result[addr.String()] = inter.HardwareAddr.String()
 		}
-		// Info.Println(inter.Name , " : ", inter.HardwareAddr, ", ")
-		// Info.Println(inter.Addrs())
+		// logger.Infof(inter.Name , " : ", inter.HardwareAddr, ", ")
+		// logger.Infof(inter.Addrs())
 	}
 	return result
 }

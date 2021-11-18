@@ -46,6 +46,11 @@ distribution: install
 	cp resources/script/*.bat bin/windows_amd64
 	cd bin/ ; zip -r -9 ${PACKAGE}.zip ./linux/ ; zip -r -9 ${PACKAGE}.zip ./windows_amd64/ ; zip -r -9 ${PACKAGE}.zip ./windows_386/
 
+# DEV / Update GO modules
+mod: 
+	cd src/
+	go mod tidy
+
 format:
 	cd src/
 	gofmt -w .

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"net/http"
+
 	// "os"
 	"sort"
 	"strconv"
@@ -82,7 +83,7 @@ type RestStateResult struct {
 }
 
 func dumpRoute(route string) {
-	Info.Println("Registering route [" + colorer.Green("/" + route) + "]")
+	logger.Infof("Registering route [" + colorer.Green("/"+route) + "]")
 }
 
 // func retrieveIpFromMac(mac strinc) string {
@@ -109,14 +110,14 @@ func renderResult(c echo.Context, status int, result interface{}) error {
 }
 
 func pingIp(ip string) *RestStateResult {
-	Info.Println("Checking state of remote host with IP [" + ip + "]")
+	logger.Infof("Checking state of remote host with IP [" + ip + "]")
 	result := &RestStateResult{
 		Host:  ip,
 		State: HOST_STATE_ONLINE,
 	}
 	pinger, err := ping.NewPinger(ip)
 	if err != nil {
-		Info.Println("Can't retrieve PING results (rights problems when executing sol, maybe ?)", err)
+		logger.Infof("Can't retrieve PING results (rights problems when executing sol, maybe ?)", err)
 		result.State = HOST_STATE_UNKNOWN
 	}
 	pinger.Count = 3
@@ -125,7 +126,7 @@ func pingIp(ip string) *RestStateResult {
 	pinger.SetPrivileged(true)
 	pinger.Run()                                                                                                                                                                                                                                              // blocks until finished
 	stats := pinger.Statistics()                                                                                                                                                                                                                              // get send/receive/rtt stats
-	Info.Println("Ping results for [" + stats.Addr + "], [" + strconv.Itoa(stats.PacketsSent) + "] packets transmitted, [" + strconv.Itoa(stats.PacketsRecv) + "] packets received, [" + strconv.FormatFloat(stats.PacketLoss, 'f', 2, 64) + "] packet loss") // , round-trip min/avg/max/stddev = " + stats.MinRtt + "/" + stats.AvgRtt + "/" + stats.MaxRtt + "/" + stats.StdDevRtt + "")
+	logger.Infof("Ping results for [" + stats.Addr + "], [" + strconv.Itoa(stats.PacketsSent) + "] packets transmitted, [" + strconv.Itoa(stats.PacketsRecv) + "] packets received, [" + strconv.FormatFloat(stats.PacketLoss, 'f', 2, 64) + "] packet loss") // , round-trip min/avg/max/stddev = " + stats.MinRtt + "/" + stats.AvgRtt + "/" + stats.MaxRtt + "/" + stats.StdDevRtt + "")
 	if stats.PacketsRecv == 0 {
 		result.State = HOST_STATE_OFFLINE
 	}
@@ -142,10 +143,10 @@ func executeCommandWithDelay(availableCommand CommandConfiguration) {
 func ListenHTTP(port int) {
 	// externalIp, _ := ExternalIP()
 	// baseExternalUrl := "http://" + externalIp + ":" + strconv.Itoa(port)
-	// Info.Println("Now listening HTTP on port [" + strconv.Itoa(port) + "], urls will be : ")
+	// logger.Infof("Now listening HTTP on port [" + strconv.Itoa(port) + "], urls will be : ")
 	/*
 		for key, value := range routes {
-						Info.Println(" - " + baseExternalUrl + key)
+						logger.Infof(" - " + baseExternalUrl + key)
 								}
 	*/
 
@@ -157,9 +158,9 @@ func ListenHTTP(port int) {
 	// e.Use(middleware.Gzip())
 
 	if configuration.Auth.isEmpty() {
-		Info.Println("HTTP starting on port [" + colorer.Green(strconv.Itoa(port)) + "], without auth")
+		logger.Infof("HTTP starting on port [" + colorer.Green(strconv.Itoa(port)) + "], without auth")
 	} else {
-		Info.Println("HTTP starting on port [" + colorer.Green(strconv.Itoa(port)) + "], with auth activated : login [" + configuration.Auth.Login + "], password [" + strings.Repeat("*", len(configuration.Auth.Password)) + "]")
+		logger.Infof("HTTP starting on port [" + colorer.Green(strconv.Itoa(port)) + "], with auth activated : login [" + configuration.Auth.Login + "], password [" + strings.Repeat("*", len(configuration.Auth.Password)) + "]")
 		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 			if username == configuration.Auth.Login && password == configuration.Auth.Password {
 				return true, nil
@@ -215,7 +216,7 @@ func ListenHTTP(port int) {
 			for idx, _ := range configuration.Commands {
 				availableCommand := configuration.Commands[idx]
 				if availableCommand.Operation == operation {
-					Info.Println("Executing [" + operation + "]")
+					logger.Infof("Executing [" + operation + "]")
 					defer ExecuteCommand(availableCommand)
 					break
 				}
@@ -273,10 +274,10 @@ func ListenHTTP(port int) {
 		}
 
 		mac := c.Param("mac")
-		Info.Println("Now sending wol magic packet to MAC address [" + mac + "]")
+		logger.Infof("Now sending wol magic packet to MAC address [" + mac + "]")
 		magicPacket, err := EncodeMagicPacket(mac)
 		if err != nil {
-			Error.Println(err)
+			logger.Errorf("Error while sending magic packet to MAC address ["+mac+"]", err)
 		} else {
 			magicPacket.Wake(configuration.BroadcastIP)
 		}
@@ -284,12 +285,12 @@ func ListenHTTP(port int) {
 	})
 
 	// localIp := "0.0.0.0"
-	if err := e.Start(":" + strconv.Itoa(port)) ; err != http.ErrServerClosed {
+	if err := e.Start(":" + strconv.Itoa(port)); err != http.ErrServerClosed {
 		if configuration.ExitIfAnyPortIsAlreadyUsed {
-			Error.Println("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be stopped, per configuration) : " + err.Error())
+			logger.Errorf("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be stopped, per configuration) : " + err.Error())
 			defer ExitDaemon()
 		} else {
-			Error.Println("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be continue) : " + err.Error())
+			logger.Errorf("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be continue) : " + err.Error())
 		}
 	}
 }

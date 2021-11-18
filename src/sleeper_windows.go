@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	DEFAULT_COMMAND_SLEEP    = "sleep"
+	DEFAULT_COMMAND_SLEEP     = "sleep"
 	DEFAULT_COMMAND_HIBERNATE = "hibernate"
-	DEFAULT_COMMAND_SHUTDOWN = "shutdown"
+	DEFAULT_COMMAND_SHUTDOWN  = "shutdown"
 )
 
 func RegisterDefaultCommand() {
@@ -23,7 +23,7 @@ func RegisterDefaultCommand() {
 
 func ExecuteCommand(Command CommandConfiguration) {
 	if Command.CommandType == COMMAND_TYPE_INTERNAL_DLL {
-		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "]")
+		logger.Infof("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "]")
 		if Command.Operation == DEFAULT_COMMAND_SLEEP {
 			sleepDLLImplementation(0)
 		} else if Command.Operation == DEFAULT_COMMAND_HIBERNATE {
@@ -32,10 +32,10 @@ func ExecuteCommand(Command CommandConfiguration) {
 			shutdownDLLImplementation()
 		}
 	} else if Command.CommandType == COMMAND_TYPE_EXTERNAL {
-		Info.Println("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
+		logger.Infof("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
 		sleepCommandLineImplementation(Command.Command)
 	} else {
-		Info.Println("Unknown command type [" + Command.CommandType + "]")
+		logger.Infof("Unknown command type [" + Command.CommandType + "]")
 	}
 }
 
@@ -43,12 +43,12 @@ func sleepCommandLineImplementation(cmd string) {
 	if cmd == "" {
 		cmd = "C:\\Windows\\System32\\rundll32.exe powrprof.dll,SetSuspendState 0,1,1"
 	}
-	Info.Println("Sleep implementation [windows], sleep command is [", cmd, "]")
+	logger.Infof("Sleep implementation [windows], sleep command is [", cmd, "]")
 	_, _, err := Execute(cmd)
 	if err != nil {
-		Error.Println("Can't execute command [" + cmd + "] : " + err.Error())
+		logger.Errorf("Can't execute command [" + cmd + "] : " + err.Error())
 	} else {
-		Info.Println("Command correctly executed")
+		logger.Infof("Command correctly executed")
 	}
 }
 
@@ -60,10 +60,10 @@ func sleepDLLImplementation(state int) {
 	// ex. : uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("Done Title"))),
 	ret, _, _ := proc.Call(
 		uintptr(state), // hibernate
-		uintptr(0), // forceCritical
-		uintptr(0)) // disableWakeEvent
+		uintptr(0),     // forceCritical
+		uintptr(0))     // disableWakeEvent
 
-	Info.Printf("Command executed, result code [" + fmt.Sprint(ret) + "]")
+	logger.Infof("Command executed, result code [" + fmt.Sprint(ret) + "]")
 }
 
 func shutdownDLLImplementation() {
@@ -86,10 +86,10 @@ func shutdownDLLImplementation() {
 			uintptr(0)) // bRebootAfterShutdown
 
 		// ret 0 = false, ret 1 = true = success
-		Info.Printf("Command executed, result code [" + fmt.Sprint(ret) + "]")
+		logger.Infof("Command executed, result code [" + fmt.Sprint(ret) + "]")
 		return nil
 	})
 	if err != nil {
-		Error.Printf("Can't execute command")
+		logger.Errorf("Can't execute command")
 	}
 }

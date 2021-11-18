@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/juju/loggo"
 )
 
 const (
@@ -65,37 +66,39 @@ func (conf *Configuration) InitDefaultConfiguration() {
 
 func (conf *Configuration) Load(configurationFileName string) {
 	if _, err := os.Stat(configurationFileName); err == nil {
-		Info.Println("Configuration file found under [" + colorer.Green(configurationFileName) + "], now reading content")
+		logger.Infof("Configuration file found under [" + colorer.Green(configurationFileName) + "], now reading content")
 		file, _ := os.Open(configurationFileName)
 		decoder := json.NewDecoder(file)
 		decoder.DisallowUnknownFields()
 		err := decoder.Decode(&conf)
 		if err != nil {
-			Error.Println("error while loading configuration :", err)
+			logger.Errorf("error while loading configuration :", err)
 			defer ExitDaemon()
 		}
 	} else {
-		Info.Println("No external configuration file found under [" + colorer.Red(configurationFileName) + "], will use default values")
+		logger.Infof("No external configuration file found under [" + colorer.Red(configurationFileName) + "], will use default values")
+	}
+}
+
+func (conf *Configuration) RefineLogger() {
+	// Gestion logs
+	switch conf.LogLevel {
+	case "NONE", "OFF":
+		logger.SetLogLevel(loggo.CRITICAL)
+	case "DEBUG":
+		logger.SetLogLevel(loggo.DEBUG)
+	case "INFO":
+		logger.SetLogLevel(loggo.INFO)
+	case "WARN", "WARNING":
+		logger.SetLogLevel(loggo.WARNING)
+	case "ERROR":
+		logger.SetLogLevel(loggo.ERROR)
+	default:
+		panic("unrecognized log level[" + colorer.Red(conf.LogLevel) + "], allowed are NONE or OFF, DEBUG, INFO, WARN or WARNING, ERROR")
 	}
 }
 
 func (conf *Configuration) Parse() {
-	// Gestion logs
-	switch conf.LogLevel {
-	case "NONE", "OFF":
-		InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
-	case "DEBUG":
-		InitLoggers(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
-	case "INFO":
-		InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-	case "WARN", "WARNING":
-		InitLoggers(ioutil.Discard, ioutil.Discard, os.Stdout, os.Stderr)
-	case "ERROR":
-		InitLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, os.Stderr)
-	default:
-		panic("unrecognized log level[" + conf.LogLevel + "], allowed are NONE or OFF, DEBUG, INFO, WARN or WARNING, ERROR")
-	}
-
 	// Convert activated ports
 	for _, s := range conf.Listeners {
 		var splitted = strings.Split(s, ":")
@@ -112,17 +115,17 @@ func (conf *Configuration) Parse() {
 			listenerConfiguration.nature = "HTTP"
 			conf.listenersConfiguration = append(conf.listenersConfiguration, *listenerConfiguration)
 		} else {
-			Error.Println("Unknown listener type [" + key + "], valid values are : UDP, HTTP")
+			logger.Errorf("Unknown listener type [" + key + "], valid values are : UDP, HTTP")
 		}
 	}
-	Trace.Println("Configuration loaded", conf)
+	logger.Debugf("Configuration loaded", conf)
 
 	// If only one command, then force default, and if no commands are found, inject default ones
 	var nbCommands = len(conf.Commands)
 	if nbCommands == 0 {
 		RegisterDefaultCommand()
 	} else if nbCommands == 1 {
-		Info.Println("Only one command found in configuration, forcing default if needed")
+		logger.Infof("Only one command found in configuration, forcing default if needed")
 		conf.Commands[0].IsDefault = true
 	}
 
@@ -130,22 +133,22 @@ func (conf *Configuration) Parse() {
 	for idx, _ := range conf.Commands {
 		command := &conf.Commands[idx]
 		if command.CommandType == "" {
-			Info.Println("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
+			logger.Infof("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
 	}
 
 	// Stop policy
 	if conf.ExitIfAnyPortIsAlreadyUsed {
-		Info.Println("Daemon will stop if any listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
+		logger.Infof("Daemon will stop if any listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
 	} else {
-		Info.Println("Daemon won't stop even if one listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
+		logger.Infof("Daemon won't stop even if one listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
 	}
 
 	// Avoid dual UDP sending
 	if conf.AvoidDualUDPSending.AvoidDualUDPSendingActive {
-		Info.Println("Avoid dual UDP sending enabled, delay is [" + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
+		logger.Infof("Avoid dual UDP sending enabled, delay is [" + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
 	} else {
-		Info.Println("Avoid dual UDP sending not enabled")
+		logger.Infof("Avoid dual UDP sending not enabled")
 	}
 }
