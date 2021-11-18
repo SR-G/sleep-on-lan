@@ -189,13 +189,15 @@ Reference : [nssm](https://nssm.cc/usage)
 
 The Sleep-On-Lan process must use (usually) port 9 (see configuration section if you need another port or if you need to listen to several UDP ports).
 
-Thus the process has either to be ran as root, either has to have the authorization to start on ports < 1024.
+Thus the process has either to be ran as `root`, either has to have the authorization to start on ports < 1024.
 
 The following example allows the process to run on ports &lt; 1024 on recent Linux kernels (for example on ubuntu) :
 
 <pre>sudo setcap 'cap_net_bind_service=+ep' /path/to/sol_binary
 nohup /path/to/sol_binary &gt; /var/log/sleep-on-lan.log 2&gt;&1 &
 </pre>
+
+So to summarize : if you are facing the error inside logs `listen udp :9: bind: permission denied`, you either need to run the program as root, either to apply the proper setcap permission.
 
 #### Daemonization
 
