@@ -32,7 +32,7 @@ conf:
 
 run:
 	setcap 'cap_net_bind_service=+ep' ${GOPATH}/bin/sleep-on-lan
-	${GOPATH}/bin/sleep-on-lan -c resources/dev/sol-local-development-configuration.HS-soft-error.json
+	${GOPATH}/bin/sleep-on-lan -c resources/dev/sol-local-development-configuration.HS-hard-error.json
 
 distribution: install
 	mkdir -p bin/linux/ bin/windows_amd64/ bin/windows_386/
