@@ -189,7 +189,7 @@ Reference : [nssm](https://nssm.cc/usage)
 
 The Sleep-On-Lan process must use (usually) port 9 (see configuration section if you need another port or if you need to listen to several UDP ports).
 
-Thus the process has either to be ran as `root`, either has to have the authorization to start on ports < 1024.
+Thus the process has either to be ran as `root`, either has to have the authorization to start on ports &lt; 1024.
 
 The following example allows the process to run on ports &lt; 1024 on recent Linux kernels (for example on ubuntu) :
 
