@@ -57,8 +57,9 @@ type RestResultListenerConfiguration struct {
 type RestResult struct {
 	XMLName              xml.Name `xml:"result" json:"-"`
 	Application          string   `xml:"application"`
-	Version              string   `xml:"version"`
-	CompilationTimestamp string   `xml:"compilation"`
+	Version              string   `xml:"version,omitifempty"`
+	CompilationTimestamp string   `xml:"compilation-timestamp,omitifempty"`
+	Commit               string   `xml:"commit,omitifempty"`
 	Hosts                RestResultHosts
 	Listeners            RestResultListeners
 	Commands             RestResultCommands
@@ -172,10 +173,11 @@ func ListenHTTP(port int) {
 	dumpRoute("")
 	e.GET("/", func(c echo.Context) error {
 		result := &RestResult{}
-		result.Application = Version.VersionLabel
-		result.Version = Version.String()
-		if Version.Build != "" {
-			result.CompilationTimestamp = Version.Build
+		result.Application = Version.ApplicationName
+		result.Version = Version.GetVersion()
+		result.Commit = Version.Commit
+		if Version.CompilationTimestamp != "" {
+			result.CompilationTimestamp = Version.CompilationTimestamp
 		}
 		result.Hosts = RestResultHosts{}
 		result.Listeners = RestResultListeners{}

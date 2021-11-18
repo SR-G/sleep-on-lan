@@ -8,9 +8,9 @@ VERSION=1.1.0
 VERSION_LABEL=SNAPSHOT
 PACKAGE=sleep-on-lan
 DISTRIBUTION_PACKAGE=SleepOnLAN-${VERSION}-${VERSION_LABEL}
-BUILD_TIME=$(date "%FT%T%z")
+BUILD_TIME=$(shell date "+%FT%T%z")
 
-LDFLAGS=-ldflags "-s -w -X 'main.BuildCommit=`git rev-parse HEAD`' -X 'main.BuildVersion=${VERSION}' -X 'main.BuildVersionLabel=${VERSION_LABEL}'"
+LDFLAGS=-ldflags "-s -w -X 'main.BuildCommit=`git rev-parse HEAD`' -X 'main.BuildVersion=${VERSION}' -X 'main.BuildVersionLabel=${VERSION_LABEL}' -X 'main.BuildCompilationTimestamp=${BUILD_TIME}'"
 
 ifeq ($(shell hostname),jupiter)
 	DOCKER_IMAGE="tensin-app-golang"
@@ -25,6 +25,7 @@ endif
 # DEV / Quick build
 build:
 	cd src/
+	echo "${BUILD_TIME}"
 	go install ${LDFLAGS} sleep-on-lan
 
 # DEV / Clean
