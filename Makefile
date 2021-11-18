@@ -5,7 +5,7 @@ BINARY=sol
 PWD := $(shell pwd)
 
 VERSION=1.1.0
-VERSION_LABEL=SNAPSHOT
+VERSION_LABEL=RELEASE
 PACKAGE=sleep-on-lan
 DISTRIBUTION_PACKAGE=SleepOnLAN-${VERSION}-${VERSION_LABEL}
 BUILD_TIME=$(shell date "+%FT%T%z")
@@ -44,19 +44,19 @@ run:
 
 # DEV / Create ZIP 
 distribution: install
-	mkdir -p bin/linux_amd64/ bin/linux_arm64/ bin/linux_arm/ bin/windows_amd64/ bin/windows_i386/
+	mkdir -p bin/linux_amd64/ bin/linux_arm64/ bin/linux_arm/ bin/windows_amd64/ bin/windows_386/
 	cp ${GOPATH}/bin/${PACKAGE} bin/linux_amd64/sol
 	cp ${GOPATH}/bin/linux_arm64/${PACKAGE} bin/linux_arm64/sol
 	cp ${GOPATH}/bin/linux_arm/${PACKAGE} bin/linux_arm/sol
 	cp ${GOPATH}/bin/windows_amd64/${PACKAGE}.exe bin/windows_amd64/sol.exe
-	cp ${GOPATH}/bin/windows_i386/${PACKAGE}.exe bin/windows_i386/sol.exe
+	cp ${GOPATH}/bin/windows_386/${PACKAGE}.exe bin/windows_386/sol.exe
 	cp resources/configuration/default/sol-basic-configuration.json bin/linux_amd64/sol.json
 	cp resources/configuration/default/sol-basic-configuration.json bin/linux_arm64/sol.json
 	cp resources/configuration/default/sol-basic-configuration.json bin/linux_arm/sol.json
 	cp resources/configuration/default/sol-basic-configuration.json bin/windows_amd64/sol.json
-	cp resources/configuration/default/sol-basic-configuration.json bin/windows_i386/sol.json
+	cp resources/configuration/default/sol-basic-configuration.json bin/windows_386/sol.json
 	cp resources/script/*.bat bin/windows_amd64
-	cp resources/script/*.bat bin/windows_i386
+	cp resources/script/*.bat bin/windows_386
 	cd bin/ 
 	zip -r -9 ${DISTRIBUTION_PACKAGE}.zip ./linux_amd64/
 	zip -r -9 ${DISTRIBUTION_PACKAGE}.zip ./linux_arm64/
