@@ -173,9 +173,9 @@ func ListenHTTP(port int) {
 	e.GET("/", func(c echo.Context) error {
 		result := &RestResult{}
 		result.Application = Version.VersionLabel
-		result.Version = Version.Version()
-		if Build != "" {
-			result.CompilationTimestamp = Build
+		result.Version = Version.String()
+		if Version.Build != "" {
+			result.CompilationTimestamp = Version.Build
 		}
 		result.Hosts = RestResultHosts{}
 		result.Listeners = RestResultListeners{}

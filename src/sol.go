@@ -36,7 +36,7 @@ func init() {
 	flaggy.SetName("Sleep-On-LAN")
 	flaggy.SetDescription("Daemon allowing to send a linux or windows computer to sleep")
 	flaggy.DefaultParser.ShowHelpOnUnexpected = true
-	flaggy.SetVersion(Version.Version())
+	flaggy.SetVersion(Version.String())
 
 	subCommandGenerateConfiguration = flaggy.NewSubcommand("generate-configuration")
 	subCommandGenerateConfiguration.Description = "Generate a default configuration JSON file"
@@ -104,7 +104,7 @@ func startDaemon() {
 	configuration.Load(fullConfigurationFileName)
 	configuration.RefineLogger()
 	configuration.Parse()
-	logger.Infof("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.Version()) + "]")
+	logger.Infof("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.String()) + "]")
 
 	// Display found IP/MAC
 	logger.Infof("Now starting sleep-on-lan, hardware IP/mac addresses are : ")

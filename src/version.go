@@ -5,22 +5,25 @@ import (
 	"fmt"
 )
 
+// These variables are injected through Makefile at compile time
+var BuildVersion = "1.0.7-SNAPSHOT"
+var BuildVersionLabel = ""
+var BuildCommit = ""
+
 type version struct {
-	ApplicationName     string
-	Major, Minor, Patch int
-	VersionLabel        string
-	VersionName         string
+	ApplicationName string // Name of the program
+	Version         string // Version, e.g. 1.0.0
+	VersionLabel    string // Label of the version, like SNAPSHOT or RELEASE
+	VersionName     string // Name of the version, like Buster, ...
+	Build           string // GiT commit hash
 }
 
 // Version string
-var Version = version{"sleep-on-lan", 1, 1, 0, "SNAPSHOT", ""}
+var Version = version{ApplicationName: "sleep-on-lan", Version: BuildVersion, VersionLabel: BuildVersionLabel, Build: BuildCommit}
 
-// Build string
-var Build string
-
-func (v version) Version() string {
+func (v version) DumpVersion() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch))
+	buf.WriteString(fmt.Sprintf("%s", v.Version))
 	if v.VersionLabel != "" {
 		buf.WriteString("-" + v.VersionLabel)
 	}
@@ -29,15 +32,15 @@ func (v version) Version() string {
 
 func (v version) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s version %d.%d.%d", v.ApplicationName, v.Major, v.Minor, v.Patch))
+	buf.WriteString(fmt.Sprintf("%s version %s", v.ApplicationName, v.Version))
 	if v.VersionLabel != "" {
 		buf.WriteString("-" + v.VersionLabel)
 	}
 	if v.VersionName != "" {
 		buf.WriteString(" \"" + v.VersionName + "\"")
 	}
-	if Build != "" {
-		buf.WriteString("\nGit commit hash: " + Build)
+	if v.Build != "" {
+		buf.WriteString("\nGit commit hash: " + v.Build)
 	}
 	return buf.String()
 }
