@@ -258,6 +258,8 @@ Switch  Network_SoL_Laptop   	"Sleep PC (laptop)"   <sleep>		(WoL, Status, Netwo
 
 ## Developement
 
+### Regular operations
+
 A few commands are available through the provided `Makefile` : 
 
 - Launch a `golang` docker container (to be executed from host) :
@@ -289,3 +291,17 @@ make clean
 ```bash
 make run
 ```
+
+### Release procedure
+
+- Update release version in makefile
+- Commit everything & create new tag
+```bash
+git add .
+git commit -m"Prepare 1.1.0 RELEASE"
+git push origin master
+git tag 1.1.0-RELEASE 
+git push origin 1.1.0-RELEASE 
+```
+- Create distribution `make distribution` and upload the ZIP generated under `bin/*.zip` on GitHub
+- Change Makefile (increase number, switch back to SNAPSHOT)
