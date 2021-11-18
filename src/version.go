@@ -6,8 +6,8 @@ import (
 )
 
 // These variables are injected through Makefile at compile time
-var BuildVersion = "1.0.7-SNAPSHOT"
-var BuildVersionLabel = ""
+var BuildVersion = "1.0.7"
+var BuildVersionLabel = "SNAPSHOT"
 var BuildCommit = ""
 
 type version struct {
