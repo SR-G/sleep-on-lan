@@ -104,7 +104,7 @@ func startDaemon() {
 	configuration.Load(fullConfigurationFileName)
 	configuration.RefineLogger()
 	configuration.Parse()
-	logger.Infof("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.String()) + "]")
+	logger.Infof("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.GetVersion()) + "], compilation timestamp [" + colorer.Green(Version.CompilationTimestamp) + "], git commit [" + colorer.Green(Version.Commit) + "]")
 
 	// Display found IP/MAC
 	logger.Infof("Now starting sleep-on-lan, hardware IP/mac addresses are : ")

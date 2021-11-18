@@ -25,7 +25,6 @@ endif
 # DEV / Quick build
 build:
 	cd src/
-	echo "${BUILD_TIME}"
 	go install ${LDFLAGS} sleep-on-lan
 
 # DEV / Clean
