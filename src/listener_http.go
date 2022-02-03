@@ -215,7 +215,7 @@ func ListenHTTP(port int) {
 				Operation: operation,
 				Result:    true,
 			}
-			for idx, _ := range configuration.Commands {
+			for idx := range configuration.Commands {
 				availableCommand := configuration.Commands[idx]
 				if availableCommand.Operation == operation {
 					logger.Infof("Executing [" + operation + "]")

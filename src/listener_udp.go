@@ -100,7 +100,7 @@ func leftPad2Len(s string, padStr string, overallLen int) string {
 }
 
 func doAction() {
-	for idx, _ := range configuration.Commands {
+	for idx := range configuration.Commands {
 		Command := configuration.Commands[idx]
 		if Command.IsDefault {
 			isActionInProgress = false

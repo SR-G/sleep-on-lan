@@ -136,7 +136,7 @@ func (conf *Configuration) Parse() error {
 	}
 
 	// Set type to external if not provided
-	for idx, _ := range conf.Commands {
+	for idx := range conf.Commands {
 		command := &conf.Commands[idx]
 		if command.CommandType == "" {
 			logger.Warningf("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
@@ -146,7 +146,7 @@ func (conf *Configuration) Parse() error {
 
 	// Reject commands with improper types
 	improperCommandTypesFound := false
-	for idx, _ := range conf.Commands {
+	for idx := range conf.Commands {
 		command := &conf.Commands[idx]
 		if command.CommandType != COMMAND_TYPE_EXTERNAL && command.CommandType != COMMAND_TYPE_INTERNAL_DLL {
 			logger.Errorf("Command [" + colorer.Green(command.Operation) + "] is configured with an improper type [" + colorer.Red(command.CommandType) + "] (only '" + colorer.Green(COMMAND_TYPE_INTERNAL_DLL) + "' or '" + colorer.Green(COMMAND_TYPE_EXTERNAL) + "' are allowed)")
