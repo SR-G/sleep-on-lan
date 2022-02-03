@@ -233,7 +233,7 @@ func ListenHTTP(port int) {
 			Operation: "quit",
 			Result:    true,
 		}
-		defer ExitDaemon()
+		defer ExitDaemon("quit command triggered")
 		return renderResult(c, http.StatusOK, result)
 
 	})
@@ -290,7 +290,7 @@ func ListenHTTP(port int) {
 	if err := e.Start(":" + strconv.Itoa(port)); err != http.ErrServerClosed {
 		if configuration.ExitIfAnyPortIsAlreadyUsed {
 			logger.Errorf("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be stopped, per configuration) : " + err.Error())
-			defer ExitDaemon()
+			defer ExitDaemon("port already taken")
 		} else {
 			logger.Errorf("Unable to start HTTP listener on port [" + strconv.Itoa(port) + "] (program will be continue) : " + err.Error())
 		}

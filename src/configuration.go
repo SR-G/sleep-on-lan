@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -64,7 +65,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	// default commands are registered on Parse() method, depending on the current operating system
 }
 
-func (conf *Configuration) Load(configurationFileName string) {
+func (conf *Configuration) Load(configurationFileName string) error {
 	if _, err := os.Stat(configurationFileName); err == nil {
 		logger.Infof("Configuration file found under [" + colorer.Green(configurationFileName) + "], now reading content")
 		file, _ := os.Open(configurationFileName)
@@ -72,15 +73,16 @@ func (conf *Configuration) Load(configurationFileName string) {
 		decoder.DisallowUnknownFields()
 		err := decoder.Decode(&conf)
 		if err != nil {
-			logger.Errorf("error while loading configuration :", err)
-			defer ExitDaemon()
+			return err
 		}
 	} else {
 		logger.Infof("No external configuration file found under [" + colorer.Red(configurationFileName) + "], will use default values")
 	}
+
+	return nil
 }
 
-func (conf *Configuration) RefineLogger() {
+func (conf *Configuration) RefineLogger() error {
 	// Gestion logs
 	switch conf.LogLevel {
 	case "NONE", "OFF":
@@ -94,11 +96,13 @@ func (conf *Configuration) RefineLogger() {
 	case "ERROR":
 		logger.SetLogLevel(loggo.ERROR)
 	default:
-		panic("unrecognized log level[" + colorer.Red(conf.LogLevel) + "], allowed are NONE or OFF, DEBUG, INFO, WARN or WARNING, ERROR")
+		logger.Errorf("unrecognized log level[" + colorer.Red(conf.LogLevel) + "], allowed are NONE or OFF, DEBUG, INFO, WARN or WARNING, ERROR")
+		return errors.New("unknown log level")
 	}
+	return nil
 }
 
-func (conf *Configuration) Parse() {
+func (conf *Configuration) Parse() error {
 	// Convert activated ports
 	for _, s := range conf.Listeners {
 		var splitted = strings.Split(s, ":")
@@ -125,17 +129,32 @@ func (conf *Configuration) Parse() {
 	if nbCommands == 0 {
 		RegisterDefaultCommand()
 	} else if nbCommands == 1 {
-		logger.Infof("Only one command found in configuration, forcing default if needed")
-		conf.Commands[0].IsDefault = true
+		if !conf.Commands[0].IsDefault {
+			logger.Warningf("Only one command found in configuration, [" + colorer.Green(conf.Commands[0].Operation) + "], and this command is not set as default : forcing default")
+			conf.Commands[0].IsDefault = true
+		}
 	}
 
 	// Set type to external if not provided
 	for idx, _ := range conf.Commands {
 		command := &conf.Commands[idx]
 		if command.CommandType == "" {
-			logger.Infof("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
+			logger.Warningf("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
+	}
+
+	// Reject commands with improper types
+	improperCommandTypesFound := false
+	for idx, _ := range conf.Commands {
+		command := &conf.Commands[idx]
+		if command.CommandType != COMMAND_TYPE_EXTERNAL && command.CommandType != COMMAND_TYPE_INTERNAL_DLL {
+			logger.Errorf("Command [" + colorer.Green(command.Operation) + "] is configured with an improper type [" + colorer.Red(command.CommandType) + "] (only '" + colorer.Green(COMMAND_TYPE_INTERNAL_DLL) + "' or '" + colorer.Green(COMMAND_TYPE_EXTERNAL) + "' are allowed)")
+			improperCommandTypesFound = true
+		}
+	}
+	if improperCommandTypesFound {
+		return errors.New("some improper command types defined")
 	}
 
 	// Stop policy
@@ -151,4 +170,6 @@ func (conf *Configuration) Parse() {
 	} else {
 		logger.Infof("Avoid dual UDP sending not enabled")
 	}
+
+	return nil
 }

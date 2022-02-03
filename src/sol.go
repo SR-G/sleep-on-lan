@@ -21,8 +21,12 @@ var exit chan bool
 var colorer *color.Color
 var logger = loggo.GetLogger("")
 
-func ExitDaemon() {
-	logger.Infof("Stopping daemon ...")
+func ExitDaemon(s string) {
+	if s == "" {
+		logger.Errorf("Stopping daemon ...")
+	} else {
+		logger.Errorf("Stopping daemon, " + s)
+	}
 	exit <- true
 }
 
@@ -99,40 +103,60 @@ func startDaemon() {
 		fullConfigurationFileName = dir + string(os.PathSeparator) + configurationFileName
 	}
 
-	// Loads configuration
+	// Loads configuration, and continue only if all configuration entries are OK
+	configurationOk := true
+	configurationError := ""
 	configuration.InitDefaultConfiguration()
-	configuration.Load(fullConfigurationFileName)
-	configuration.RefineLogger()
-	configuration.Parse()
-	logger.Infof("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.GetVersion()) + "], compilation timestamp [" + colorer.Green(Version.CompilationTimestamp) + "], git commit [" + colorer.Green(Version.Commit) + "]")
-
-	// Display found IP/MAC
-	logger.Infof("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
-	for key, value := range LocalNetworkMap() {
-		logger.Infof(" - local IP adress [" + colorer.Green(key) + "], mac [" + colorer.Green(value) + "], reversed mac [" + colorer.Green(ReverseMacAddress(value)) + "]")
+	if err := configuration.Load(fullConfigurationFileName); err != nil {
+		configurationOk = false
+		configurationError = err.Error()
+	}
+	if err := configuration.RefineLogger(); err != nil {
+		configurationOk = false
+		configurationError = err.Error()
+	}
+	if err := configuration.Parse(); err != nil {
+		configurationOk = false
+		configurationError = err.Error()
 	}
 
-	// Display commands found in configuration
-	logger.Infof("Available commands are : ")
-	for _, command := range configuration.Commands {
-		logger.Infof(" - operation [" + color.Green(command.Operation) + "], command [" + color.Green(command.Command) + "], default [" + color.Green(strconv.FormatBool(command.IsDefault)) + "], type [" + color.Green(command.CommandType) + "]")
-	}
+	if !configurationOk {
+		logger.Errorf("Stopping daemon due to configuration errors : " + colorer.Red(configurationError))
+	} else {
+		logger.Infof("Application [" + colorer.Green(Version.ApplicationName) + "], version [" + colorer.Green(Version.GetVersion()) + "], compilation timestamp [" + colorer.Green(Version.CompilationTimestamp) + "], git commit [" + colorer.Green(Version.Commit) + "]")
 
-	// Starts listeners, per configuration
-	for _, listenerConfiguration := range configuration.listenersConfiguration {
-		if listenerConfiguration.active {
-			if strings.EqualFold(listenerConfiguration.nature, "UDP") {
-				go ListenUDP(listenerConfiguration.port)
-			} else if strings.EqualFold(listenerConfiguration.nature, "HTTP") {
-				go ListenHTTP(listenerConfiguration.port)
+		// Display found IP/MAC
+		logger.Infof("Now starting sleep-on-lan, hardware IP/mac addresses are : ")
+		for key, value := range LocalNetworkMap() {
+			logger.Infof(" - local IP adress [" + colorer.Green(key) + "], mac [" + colorer.Green(value) + "], reversed mac [" + colorer.Green(ReverseMacAddress(value)) + "]")
+		}
+
+		// Display commands found in configuration
+		logger.Infof("Available commands are : ")
+		for _, command := range configuration.Commands {
+			if command.Command == "" {
+				logger.Infof(" - operation [" + color.Green(command.Operation) + "], default [" + color.Green(strconv.FormatBool(command.IsDefault)) + "], type [" + color.Green(command.CommandType) + "]")
+			} else {
+				logger.Infof(" - operation [" + color.Green(command.Operation) + "], command [" + color.Green(command.Command) + "], default [" + color.Green(strconv.FormatBool(command.IsDefault)) + "], type [" + color.Green(command.CommandType) + "]")
 			}
 		}
-	}
 
-	// Blocks forever ... excepted if there are some start errors (depending on configuration)
-	select {
-	case <-exit:
-		return
+		// Starts listeners, per configuration
+		for _, listenerConfiguration := range configuration.listenersConfiguration {
+			if listenerConfiguration.active {
+				if strings.EqualFold(listenerConfiguration.nature, "UDP") {
+					go ListenUDP(listenerConfiguration.port)
+				} else if strings.EqualFold(listenerConfiguration.nature, "HTTP") {
+					go ListenHTTP(listenerConfiguration.port)
+				}
+			}
+		}
+
+		// Blocks forever ... excepted if there are some start errors (depending on configuration)
+		select {
+		case <-exit:
+			return
+		}
 	}
 }
 
