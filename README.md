@@ -231,6 +231,10 @@ You may of course daemonize the process or launch it through an external monitor
 
 ## Miscellaneous
 
+### Troubleshooting
+
+If Sleep-on-LAN cannot be triggered remotely, but the service is running and the ports are open, a firewall may be in the way. For example on Windows 10, add a rule to _Windows Defender_ to allow incoming TCP traffic on port `8009` for the REST example above.
+
 ### Logs
 
 Expected logs when starting the process should be : 
