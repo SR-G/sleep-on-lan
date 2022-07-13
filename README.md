@@ -151,12 +151,12 @@ Example 3 : default operation will put the computer to sleep on linux and a seco
     {
         "Operation" : "halt",
         "Command" : "pm-halt",
-        "Default" : "false"
+        "Default" : false
     },
     {
         "Operation" : "sleep",
         "Command" : "pm-sleep",
-        "Default" : "true"
+        "Default" : true
     }]
 </pre>
 
