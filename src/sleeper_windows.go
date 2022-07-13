@@ -32,7 +32,7 @@ func ExecuteCommand(Command CommandConfiguration) {
 			shutdownDLLImplementation()
 		}
 	} else if Command.CommandType == COMMAND_TYPE_EXTERNAL {
-		logger.Infof("Executing operation [" + Command.Operation + "], type[" + Command.CommandType + "], command [" + Command.Command + "]")
+		logger.Infof("Executing operation [" + Command.Operation + "], type [" + Command.CommandType + "], command [" + Command.Command + "]")
 		sleepCommandLineImplementation(Command.Command)
 	} else {
 		logger.Infof("Unknown command type [" + Command.CommandType + "]")

@@ -13,7 +13,7 @@ func Execute(command string) (bool, string, error) {
 
 	out, err := exec.Command(head, parts...).Output()
 	if err != nil {
-		return false, "", err
+		return false, string(out), err
 	}
 	return true, string(out), nil
 }

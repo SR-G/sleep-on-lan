@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -57,37 +58,46 @@ func init() {
 
 // Sub-command : generate JSON blank configuration (init)
 func executeCommandGenerateConfiguration() {
+	// Prepare new default configuration and associated bytes
 	c := Configuration{}
 	c.InitDefaultConfiguration()
 	c.Parse()
 
-	if _, err := os.Stat(configurationFileName); err == nil {
-		logger.Errorf("Can't generate default JSON configuration info [" + configurationFileName + "] : file already exist")
+	b, err := json.MarshalIndent(c, "", "    ")
+	if err != nil {
+		logger.Errorf("Can't create JSON content for default content", err)
 	} else {
-		logger.Infof("Writing default JSON configuration into [" + configurationFileName + "]")
-
-		file, err := os.OpenFile(configurationFileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-		if err != nil {
-			logger.Errorf("Can't write file ["+configurationFileName+"]", err)
-		}
-		defer file.Close()
-
-		// Create blank configuration (with default values) and write bytes to file
-		b, err := json.MarshalIndent(c, "", "    ")
-		if err != nil {
-			logger.Errorf("Can't create JSON content", err)
-		}
-		bytesWritten, err := file.Write(b)
-		if err != nil {
-			logger.Errorf("Can't write JSON content into ["+configurationFileName+"]", err)
+		// Check which configuration file to use (either from --config, either sol.json file alongside the binary, either default values)
+		if configurationFileNameFromCommandLine == "" {
+			// Write bytes on console (default behavior when -c is not used)
+			fmt.Println("Example of possible default configuration (to be stored alongside sol binary in a filename like [" + colorer.Green("sol.json") + "])")
+			fmt.Print(string(b))
 		} else {
-			logger.Infof("Bytes written : " + strconv.Itoa(bytesWritten))
+			// Write bytes on disk (if possible)
+			if _, err := os.Stat(configurationFileNameFromCommandLine); err == nil {
+				logger.Errorf("Can't generate default JSON configuration info [" + colorer.Red(configurationFileNameFromCommandLine) + "] : file already exist")
+			} else {
+				logger.Infof("Writing default JSON configuration into [" + colorer.Green(configurationFileNameFromCommandLine) + "]")
+
+				file, err := os.OpenFile(configurationFileNameFromCommandLine, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+				if err != nil {
+					logger.Errorf("Can't write file ["+colorer.Red(configurationFileNameFromCommandLine)+"]", err)
+				}
+				defer file.Close()
+
+				// Create blank configuration (with default values) and write bytes to file
+				bytesWritten, err := file.Write(b)
+				if err != nil {
+					logger.Errorf("Can't write JSON content into ["+colorer.Red(configurationFileNameFromCommandLine)+"]", err)
+				} else {
+					logger.Infof("Bytes written : " + strconv.Itoa(bytesWritten))
+				}
+			}
 		}
 	}
 }
 
-func startDaemon() {
-	// Check which configuration file to use (either from --config, either sol.json file alongside the binary, either default values)
+func determineConfigurationFileName() string {
 	var fullConfigurationFileName string
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
@@ -102,6 +112,12 @@ func startDaemon() {
 	} else {
 		fullConfigurationFileName = dir + string(os.PathSeparator) + configurationFileName
 	}
+	return fullConfigurationFileName
+}
+
+func startDaemon() {
+	// Check which configuration file to use (either from --config, either sol.json file alongside the binary, either default values)
+	fullConfigurationFileName := determineConfigurationFileName()
 
 	// Loads configuration, and continue only if all configuration entries are OK
 	configurationOk := true

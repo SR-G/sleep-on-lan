@@ -1,8 +1,8 @@
 package main
 
-func RegisterDefaultCommand() {
-	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: COMMAND_TYPE_EXTERNAL, IsDefault: true, Command: "pm-suspend"}
-	configuration.Commands = []CommandConfiguration{defaultCommand}
+func (conf *Configuration) RegisterDefaultCommand() {
+	defaultCommand := CommandConfiguration{Operation: "sleep", CommandType: COMMAND_TYPE_EXTERNAL, IsDefault: true, Command: "systemctl suspend"}
+	conf.Commands = []CommandConfiguration{defaultCommand}
 }
 
 func ExecuteCommand(Command CommandConfiguration) {

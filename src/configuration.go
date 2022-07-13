@@ -126,8 +126,8 @@ func (conf *Configuration) Parse() error {
 
 	// If only one command, then force default, and if no commands are found, inject default ones
 	var nbCommands = len(conf.Commands)
-	if nbCommands == 0 {
-		RegisterDefaultCommand()
+	if nbCommands == 0 || conf.Commands == nil {
+		conf.RegisterDefaultCommand()
 	} else if nbCommands == 1 {
 		if !conf.Commands[0].IsDefault {
 			logger.Warningf("Only one command found in configuration, [" + colorer.Green(conf.Commands[0].Operation) + "], and this command is not set as default : forcing default")
@@ -161,14 +161,14 @@ func (conf *Configuration) Parse() error {
 	if conf.ExitIfAnyPortIsAlreadyUsed {
 		logger.Infof("Daemon will stop if any listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
 	} else {
-		logger.Infof("Daemon won't stop even if one listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
+		logger.Debugf("Daemon won't stop even if one listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)")
 	}
 
 	// Avoid dual UDP sending
 	if conf.AvoidDualUDPSending.AvoidDualUDPSendingActive {
 		logger.Infof("Avoid dual UDP sending enabled, delay is [" + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
 	} else {
-		logger.Infof("Avoid dual UDP sending not enabled")
+		logger.Debugf("Avoid dual UDP sending not enabled")
 	}
 
 	return nil
