@@ -114,7 +114,7 @@ Default output from REST command is `XML` but may be switched from a configurati
 
 **Commands** defines the available commands.
 
-By default, on both windows and linux, only one command is defined : sleep command (through "pm-suspend" on linux and a DLL API call on windows).
+By default, on both windows and linux, only one command is defined : sleep command (through `systemctl suspend` on (recent) systemd linux, `pm-suspend` on (old) linux and a DLL API call on windows).
 
 You may customize / override this behavior, or add new commands (that will then be available under `http://<IP>:<HTTP PORT>/<operation>` if a HTTP listener is defined), if needed.
 
@@ -230,6 +230,25 @@ You may of course daemonize the process or launch it through an external monitor
 
 
 ## Miscellaneous
+
+### Available commands
+
+Just launch `sol help` : 
+
+```
+Sleep-On-LAN - Daemon allowing to send a linux or windows computer to sleep
+
+  Usage:
+    Sleep-On-LAN [generate-configuration]
+
+  Subcommands: 
+    generate-configuration   Generate a default configuration JSON file
+
+  Flags: 
+       --version   Displays the program version string.
+    -h --help      Displays help with available flag, subcommand, and positional value parameters.
+    -c --config    Configuration file to use (optional, default is 'sol.json' next to the binary)
+```
 
 ### Troubleshooting
 
