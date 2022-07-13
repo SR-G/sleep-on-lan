@@ -164,7 +164,7 @@ Example 3 : default operation will put the computer to sleep on linux and a seco
 
 ### Under windows
 
-The Sleep-On-Lan process may be run manually or, for convenience, installed as a service. The easiest way to install the Sleep-On-Lan service is probably to use [NSSM](https://nssm.cc/) (the Non-Sucking Service Manager).
+The Sleep-On-Lan process may be run manually or, for convenience, installed as a service. The easiest way to install the Sleep-On-Lan service is probably to use [NSSM](https://nssm.cc/) (the Non-Sucking Service Manager). To be executed as admin (Right click on the .cmd file that you created > Execute as administrator).
 
 Usage :
 
@@ -173,18 +173,18 @@ Usage :
 
 Installation example :
 
-<pre>c:\Tools\nssm\2.24\win64\nssm.exe install Sleep-On-Lan c:\Tools\Sleep-On-Lan\sol.exe
+<pre>c:\Tools\nssm\2.24\win64\nssm.exe install SleepOnLan c:\Tools\Sleep-On-Lan\sol.exe
 </pre>
 
 Removal example : 
 
-<pre>c:\Tools\nssm\2.24\win64\nssm.exe remove Sleep-On-Lan confirm
+<pre>c:\Tools\nssm\2.24\win64\nssm.exe remove SleepOnLan confirm
 </pre>
 
 Configure logs of the service in an external file (adjust the paths as needed) : 
 
-<pre>C:\Tools\nssm\2.24\win64\nssm.exe set Sleep-On-Lan AppStdout "C:\Tools\SleepOnLan\sleeponlan-windows.log"
-C:\Tools\nssm\2.24\win64\nssm.exe set Sleep-On-Lan AppStderr "C:\Tools\SleepOnLan\sleeponlan-windows.log"
+<pre>C:\Tools\nssm\2.24\win64\nssm.exe set SleepOnLan AppStdout "C:\Tools\SleepOnLan\sleeponlan-windows.log"
+C:\Tools\nssm\2.24\win64\nssm.exe set SleepOnLan AppStderr "C:\Tools\SleepOnLan\sleeponlan-windows.log"
 </pre>
 
 Reference : [nssm](https://nssm.cc/usage)

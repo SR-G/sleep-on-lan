@@ -1,0 +1,2 @@
+C:\Tools\nssm\2.24\win64\nssm.exe set SleepOnLan AppStdout "C:\Tools\SleepOnLan\sleeponlan-windows.log"
+C:\Tools\nssm\2.24\win64\nssm.exe set SleepOnLan AppStderr "C:\Tools\SleepOnLan\sleeponlan-windows.log"
