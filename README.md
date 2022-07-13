@@ -290,30 +290,7 @@ If Sleep-on-LAN cannot be triggered remotely, but the service is running and the
 
 Expected logs when starting the process should be : 
 
-```
-WARNING: 2021/07/04 16:01:29 sol.go:52: Configuration file provided through --config parameter not found on disk, path is [resources/sol.json2], will try default value
-INFO: 2021/07/04 16:01:29 configuration.go:76: No external configuration file found under [/root/go/bin/sol.json], will use default values
-INFO: 2021/07/04 16:01:29 configuration.go:140: Daemon won't stop even if one listener can't be started (per `ExitIfAnyPortIsAlreadyUsed` configuration)
-INFO: 2021/07/04 16:01:29 configuration.go:147: Avoid dual UDP sending not enabled
-INFO: 2021/07/04 16:01:29 sol.go:63: Application [sleep-on-lan], version [1.0.6-SNAPSHOT]
-INFO: 2021/07/04 16:01:29 sol.go:66: Now starting sleep-on-lan, hardware IP/mac addresses are : 
-INFO: 2021/07/04 16:01:29 sol.go:68:  - local IP adress [127.0.0.1/8], mac [], reversed mac []
-INFO: 2021/07/04 16:01:29 sol.go:68:  - local IP adress [192.168.8.4/24], mac [bc:5f:f4:2b:df:2b], reversed mac [2b:df:2b:f4:5f:bc]
-INFO: 2021/07/04 16:01:29 sol.go:68:  - local IP adress [172.18.0.1/16], mac [02:42:5d:9a:cf:7d], reversed mac [7d:cf:9a:5d:42:02]
-INFO: 2021/07/04 16:01:29 sol.go:68:  - local IP adress [172.17.0.1/16], mac [02:42:0c:62:d1:6a], reversed mac [6a:d1:62:0c:42:02]
-INFO: 2021/07/04 16:01:29 sol.go:72: Available commands are : 
-INFO: 2021/07/04 16:01:29 sol.go:74:  - operation [sleep], command [pm-suspend], default [true], type [external]
-INFO: 2021/07/04 16:01:29 listener_http.go:160: HTTP starting on port [8009], without auth
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/]
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/sleep]
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/quit]
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/state/local/online]
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/state/local]
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/state/ip/:ip]
-INFO: 2021/07/04 16:01:29 listener_http.go:85: Registering route [/wol/:mac]
-INFO: 2021/07/04 16:01:29 listener_udp.go:15: Now listening UDP packets on port [9]
-⇨ http server started on [::]:8009
-```
+![Example of start logs](sleep-on-lan-start-logs.png)
 
 ### Standalone sleep on lan under windows
 
