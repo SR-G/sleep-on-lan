@@ -256,6 +256,32 @@ Sleep-On-LAN - Daemon allowing to send a linux or windows computer to sleep
     -c --config    Configuration file to use (optional, default is 'sol.json' next to the binary)
 ```
 
+### Generate a default configuration
+
+Just lauch either `sol generate-configuration` (console output) or `sol --config sol-default.json generate-configuration` to generate a valid default configuration (the same ones than what is applied if no external configuration is applied). Remember that to use that file (once generated and updated), you have either to name it exactly like the binary name + JSON extension (probably `sol.json`), or to specify a specific path with the `--config` command line configuration parameter.
+
+```
+{
+    "Listeners": [
+        "UDP:9",
+        "HTTP:8009"
+    ],
+    "LogLevel": "INFO",
+    "BroadcastIP": "192.168.255.255",
+    "ExitIfAnyPortIsAlreadyUsed": false,
+    "Commands": null,
+    "Auth": {
+        "Login": "",
+        "Password": ""
+    },
+    "HTTPOutput": "XML",
+    "AvoidDualUDPSending": {
+        "Active": false,
+        "Delay": "100ms"
+    }
+}
+```
+
 ### Troubleshooting
 
 If Sleep-on-LAN cannot be triggered remotely, but the service is running and the ports are open, a firewall may be in the way. For example on Windows 10, add a rule to _Windows Defender_ to allow incoming TCP traffic on port `8009` for the REST example above.
