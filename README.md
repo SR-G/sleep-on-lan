@@ -181,6 +181,12 @@ Removal example :
 <pre>c:\Tools\nssm\2.24\win64\nssm.exe remove Sleep-On-Lan confirm
 </pre>
 
+Configure logs of the service in an external file (adjust the paths as needed) : 
+
+<pre>C:\Tools\nssm\2.24\win64\nssm.exe set Sleep-On-Lan AppStdout "C:\Tools\SleepOnLan\sleeponlan-windows.log"
+C:\Tools\nssm\2.24\win64\nssm.exe set Sleep-On-Lan AppStderr "C:\Tools\SleepOnLan\sleeponlan-windows.log"
+</pre>
+
 Reference : [nssm](https://nssm.cc/usage)
 
 ### Under Linux
