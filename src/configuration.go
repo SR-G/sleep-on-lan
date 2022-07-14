@@ -66,19 +66,20 @@ func (conf *Configuration) InitDefaultConfiguration() {
 }
 
 func (conf *Configuration) Load(configurationFileName string) error {
-	if _, err := os.Stat(configurationFileName); err == nil {
-		logger.Infof("Configuration file found under [" + colorer.Green(configurationFileName) + "], now reading content")
-		file, _ := os.Open(configurationFileName)
-		decoder := json.NewDecoder(file)
-		decoder.DisallowUnknownFields()
-		err := decoder.Decode(&conf)
-		if err != nil {
-			return err
+	if configurationFileName != "" {
+		if _, err := os.Stat(configurationFileName); err == nil {
+			logger.Infof("Configuration file found under [" + colorer.Green(configurationFileName) + "], now reading content")
+			file, _ := os.Open(configurationFileName)
+			decoder := json.NewDecoder(file)
+			decoder.DisallowUnknownFields()
+			err := decoder.Decode(&conf)
+			if err != nil {
+				return err
+			}
+		} else {
+			logger.Infof("No external configuration file found under [" + colorer.Red(configurationFileName) + "], will use default values")
 		}
-	} else {
-		logger.Infof("No external configuration file found under [" + colorer.Red(configurationFileName) + "], will use default values")
 	}
-
 	return nil
 }
 

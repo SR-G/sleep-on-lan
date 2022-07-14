@@ -17,6 +17,7 @@ import (
 var configuration = Configuration{}
 var configurationFileName = "sol.json"
 var configurationFileNameFromCommandLine string
+var verbose bool
 var subCommandGenerateConfiguration *flaggy.Subcommand
 var exit chan bool
 var colorer *color.Color
@@ -38,6 +39,8 @@ func init() {
 
 	// Init flag reader
 	flaggy.String(&configurationFileNameFromCommandLine, "c", "config", "Configuration file to use (optional, default is 'sol.json' next to the binary)")
+	flaggy.Bool(&verbose, "v", "verbose", "Force DEBUG log level (will override what may be defined in JSON configuration)")
+
 	flaggy.SetName("Sleep-On-LAN")
 	flaggy.SetDescription("Daemon allowing to send a linux or windows computer to sleep")
 	flaggy.DefaultParser.ShowHelpOnUnexpected = true
@@ -97,21 +100,40 @@ func executeCommandGenerateConfiguration() {
 	}
 }
 
+type PossibleConfigurationFilename struct {
+	Path    string
+	Comment string
+}
+
 func determineConfigurationFileName() string {
 	var fullConfigurationFileName string
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
+	// List of all possibilities for configuration : first found one will be taken in account
+	var possibleConfigurationFileNames []PossibleConfigurationFilename
 	if configurationFileNameFromCommandLine != "" {
-		if _, err := os.Stat(configurationFileNameFromCommandLine); err == nil {
-			logger.Infof("Will use configuration file provided through --config parameter, path is [" + colorer.Green(configurationFileNameFromCommandLine) + "]")
-			fullConfigurationFileName = configurationFileNameFromCommandLine
-		} else {
-			logger.Warningf("Configuration file provided through --config parameter not found on disk, path is [" + colorer.Red(configurationFileNameFromCommandLine) + "], will try default value")
-			fullConfigurationFileName = dir + string(os.PathSeparator) + configurationFileName
-		}
-	} else {
-		fullConfigurationFileName = dir + string(os.PathSeparator) + configurationFileName
+		logger.Infof("Configuration filename provided through --config parameter [" + colorer.Green(configurationFileNameFromCommandLine) + "]")
+		possibleConfigurationFileNames = append(possibleConfigurationFileNames, PossibleConfigurationFilename{configurationFileNameFromCommandLine, "configuration filename provided through --config parameter"})
 	}
+	for _, extraPossibleConfigurationFileName := range RegisterPossibleConfigurationFileNames() {
+		possibleConfigurationFileNames = append(possibleConfigurationFileNames, extraPossibleConfigurationFileName)
+	}
+	possibleConfigurationFileNames = append(possibleConfigurationFileNames, PossibleConfigurationFilename{dir + string(os.PathSeparator) + configurationFileName, "configuration file stored alongisde SleepOnLan binary"}) // alongside binary
+
+	for _, possibleConfigurationFilename := range possibleConfigurationFileNames {
+		if _, err := os.Stat(possibleConfigurationFilename.Path); err == nil {
+			logger.Debugf("Will use configuration [" + colorer.Green(possibleConfigurationFilename.Path) + "] (" + possibleConfigurationFilename.Comment + ")")
+			fullConfigurationFileName = possibleConfigurationFilename.Path
+			break
+		} else {
+			logger.Debugf("Possible configuration file [" + colorer.Red(possibleConfigurationFilename.Path) + "] not found (" + possibleConfigurationFilename.Comment + ")")
+		}
+	}
+
+	if fullConfigurationFileName == "" {
+		logger.Infof("No configuration file found on disk, will use default values")
+	}
+
 	return fullConfigurationFileName
 }
 
@@ -134,6 +156,11 @@ func startDaemon() {
 	if err := configuration.Parse(); err != nil {
 		configurationOk = false
 		configurationError = err.Error()
+	}
+
+	// Yes this has to be done a second time, to override what may have been defined in JSON configuration
+	if verbose {
+		logger.SetLogLevel(loggo.DEBUG)
 	}
 
 	if !configurationOk {
@@ -177,6 +204,11 @@ func startDaemon() {
 }
 
 func main() {
+	// Pre-init logger (if --verbose is activated)
+	if verbose {
+		logger.SetLogLevel(loggo.DEBUG)
+	}
+
 	// Handling subcommands, if any
 	if subCommandGenerateConfiguration.Used {
 		executeCommandGenerateConfiguration()

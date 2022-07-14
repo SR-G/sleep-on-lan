@@ -14,11 +14,16 @@ const (
 	DEFAULT_COMMAND_SHUTDOWN  = "shutdown"
 )
 
-func RegisterDefaultCommand() {
+func (conf *Configuration) RegisterDefaultCommand() {
 	defaultSleepCommand := CommandConfiguration{Operation: DEFAULT_COMMAND_SLEEP, CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: true}
 	defaultHibernateCommand := CommandConfiguration{Operation: DEFAULT_COMMAND_HIBERNATE, CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: false}
 	defaultShutdownCommand := CommandConfiguration{Operation: DEFAULT_COMMAND_SHUTDOWN, CommandType: COMMAND_TYPE_INTERNAL_DLL, IsDefault: false}
 	configuration.Commands = []CommandConfiguration{defaultSleepCommand, defaultHibernateCommand, defaultShutdownCommand}
+}
+
+func RegisterPossibleConfigurationFileNames() []PossibleConfigurationFilename {
+	var possibleConfigurationFileNames []PossibleConfigurationFilename
+	return possibleConfigurationFileNames
 }
 
 func ExecuteCommand(Command CommandConfiguration) {

@@ -39,9 +39,13 @@ http://127.0.0.1:8009/wol/c4:d9:87:7a:78:35          // sends a wake-on-lan magi
 
 ## Configuration
 
-An optional configuration file may be used.
+An optional configuration file may be used. See [configuration examples](resources/configuration/default/). Order of priority for configuration filenames are : 
 
-Taken automatically in account if named `sol.json` and located in the same folder than the Sleep-On-Lan binary. Or can be manually configured at launch time with the `--config` parameter. See [configuration examples](resources/configuration/default/).
+1. The filename manually configured inside the command line with the `--config` parameter (if available on disk)
+2. (linux only) A filename under `/etc/sol.json` (if available on disk)
+3. (linux only) A filename under `/etc/sleep-on-lan.json` (if available on disk)
+4. A filename alongside the `sol` binary (i.e., in the same folder) and named `sol.json` (if available on disk)
+5. Otherwise, default values will be taken in account
 
 Content of configuration is as follow (everything is optional / below is the whole structure) :
 

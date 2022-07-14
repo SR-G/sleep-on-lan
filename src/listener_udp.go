@@ -21,11 +21,11 @@ func ListenUDP(port int) {
 	sock, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		if configuration.ExitIfAnyPortIsAlreadyUsed {
-			logger.Errorf("Error while starting listening (will exit, per configuration) :", err.Error())
+			logger.Errorf("Error while starting listening (will exit, per configuration) :", colorer.Red(err.Error()))
 			exit <- true
 			return
 		} else {
-			logger.Errorf("Error while starting listening (program will however continue) :", err.Error())
+			logger.Errorf("Error while starting listening (program will however continue) :", colorer.Red(err.Error()))
 		}
 	} else {
 		for {
@@ -34,14 +34,14 @@ func ListenUDP(port int) {
 				logger.Errorf("Error while reading :", err.Error())
 			}
 			extractedMacAddress, _ := extractMacAddress(rlen, buf)
-			logger.Infof("Received a MAC address from IP [" + remote.String() + "], extracted mac [" + extractedMacAddress.String() + "]")
+			logger.Infof("Received a MAC address from IP [" + colorer.Green(remote.String()) + "], extracted mac [" + colorer.Green(extractedMacAddress.String()) + "]")
 			if matchAddress(extractedMacAddress) {
 				logger.Infof("(reversed) received MAC address match a local address")
 				if configuration.AvoidDualUDPSending.AvoidDualUDPSendingActive {
 					// Specific behavior : let's try to avoid dual UDP sending
 					if !isActionInProgress {
 						isActionInProgress = true
-						logger.Infof("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
+						logger.Infof("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + colorer.Green(configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay) + "]")
 						go doActionWithDelay()
 					} else {
 						logger.Infof("Another command is already awaiting, rejecting this one due to dual UDP sending avoidance being activated")

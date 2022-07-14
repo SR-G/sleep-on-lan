@@ -5,6 +5,13 @@ func (conf *Configuration) RegisterDefaultCommand() {
 	conf.Commands = []CommandConfiguration{defaultCommand}
 }
 
+func RegisterPossibleConfigurationFileNames() []PossibleConfigurationFilename {
+	var possibleConfigurationFileNames []PossibleConfigurationFilename
+	possibleConfigurationFileNames = append(possibleConfigurationFileNames, PossibleConfigurationFilename{"/etc/sol.json", "default configuration filename under /etc/ (linux)"})
+	possibleConfigurationFileNames = append(possibleConfigurationFileNames, PossibleConfigurationFilename{"/etc/sleep-on-lan.json", "default configuration filename under /etc/ (linux)"})
+	return possibleConfigurationFileNames
+}
+
 func ExecuteCommand(Command CommandConfiguration) {
 	if Command.CommandType == COMMAND_TYPE_EXTERNAL {
 		logger.Infof("Executing operation [" + Command.Operation + "], type [" + Command.Command + "], command [" + Command.Command + "]")

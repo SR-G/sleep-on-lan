@@ -1,0 +1,9 @@
+{
+  "Listeners" : ["HTTP:9009" ],
+  "LogLevel" : "INFO",
+  "ExitIfAnyPortIsAlreadyUsed" : true,
+  "AvoidDualUDPSending" : {
+	  "Active": "false",
+	  "Delay": "100ms"
+  }
+}
