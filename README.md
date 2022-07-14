@@ -258,7 +258,7 @@ Sleep-On-LAN - Daemon allowing to send a linux or windows computer to sleep
 
 ### Generate a default configuration
 
-Just lauch either `sol generate-configuration` (console output) or `sol --config sol-default.json generate-configuration` to generate a valid default configuration (the same ones than what is applied if no external configuration is applied). Remember that to use that file (once generated and updated), you have either to name it exactly like the binary name + JSON extension (probably `sol.json`), or to specify a specific path with the `--config` command line configuration parameter.
+Just launch either `sol generate-configuration` (console output) or `sol --config sol-default.json generate-configuration` to generate a valid default configuration (the same ones than what is applied if no external configuration is applied). Remember that to use that file (once generated and updated), you have either to name it exactly like the binary name + JSON extension (probably `sol.json`), or to specify a specific path with the `--config` command line configuration parameter.
 
 ```
 {
@@ -269,7 +269,14 @@ Just lauch either `sol generate-configuration` (console output) or `sol --config
     "LogLevel": "INFO",
     "BroadcastIP": "192.168.255.255",
     "ExitIfAnyPortIsAlreadyUsed": false,
-    "Commands": null,
+    "Commands": [
+        {
+            "Operation": "sleep",
+            "Command": "systemctl suspend",
+            "Default": true,
+            "Type": "external"
+        }
+    ],
     "Auth": {
         "Login": "",
         "Password": ""
@@ -303,9 +310,9 @@ Another way to sleep a windows computer remotely :
 
 - [Sleep On Lan](https://github.com/philipnrmn/sleeponlan) (pure java implementation, magic anti-packet starts with 6 * 0x00 instead of 6 * 0xFF)
 
-### OpenHab configuration
+### OpenHab v2 configuration
 
-Example of configuration under OpenHab.
+Example of configuration under OpenHab (2.x).
 
 ![OpenHab](sleep-on-lan-openhab.png)
 
