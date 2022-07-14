@@ -119,7 +119,7 @@ func (conf *Configuration) Parse() error {
 			listenerConfiguration.nature = "HTTP"
 			conf.listenersConfiguration = append(conf.listenersConfiguration, *listenerConfiguration)
 		} else {
-			logger.Errorf("Unknown listener type [" + key + "], valid values are : UDP, HTTP")
+			logger.Errorf("Unknown listener type [" + colorer.Red(key) + "], valid values are : UDP, HTTP")
 		}
 	}
 	logger.Debugf("Configuration loaded", conf)
@@ -130,7 +130,7 @@ func (conf *Configuration) Parse() error {
 		conf.RegisterDefaultCommand()
 	} else if nbCommands == 1 {
 		if !conf.Commands[0].IsDefault {
-			logger.Warningf("Only one command found in configuration, [" + colorer.Green(conf.Commands[0].Operation) + "], and this command is not set as default : forcing default")
+			logger.Warningf("Only one command found in configuration, [" + colorer.Yellow(conf.Commands[0].Operation) + "], and this command is not set as default : forcing default")
 			conf.Commands[0].IsDefault = true
 		}
 	}
@@ -139,7 +139,7 @@ func (conf *Configuration) Parse() error {
 	for idx := range conf.Commands {
 		command := &conf.Commands[idx]
 		if command.CommandType == "" {
-			logger.Warningf("Forcing type to [EXTERNAL] for command [" + command.Operation + "]")
+			logger.Warningf("Forcing type to [EXTERNAL] for command [" + colorer.Yellow(command.Operation) + "]")
 			command.CommandType = COMMAND_TYPE_EXTERNAL
 		}
 	}
@@ -166,7 +166,7 @@ func (conf *Configuration) Parse() error {
 
 	// Avoid dual UDP sending
 	if conf.AvoidDualUDPSending.AvoidDualUDPSendingActive {
-		logger.Infof("Avoid dual UDP sending enabled, delay is [" + conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay + "]")
+		logger.Infof("Avoid dual UDP sending enabled, delay is [" + colorer.Green(conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay) + "]")
 	} else {
 		logger.Debugf("Avoid dual UDP sending not enabled")
 	}
