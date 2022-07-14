@@ -258,6 +258,7 @@ Sleep-On-LAN - Daemon allowing to send a linux or windows computer to sleep
        --version   Displays the program version string.
     -h --help      Displays help with available flag, subcommand, and positional value parameters.
     -c --config    Configuration file to use (optional, default is 'sol.json' next to the binary)
+    -v --verbose   Force DEBUG log level (will override what may be defined in JSON configuration)
 ```
 
 ### Generate a default configuration
