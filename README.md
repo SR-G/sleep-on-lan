@@ -37,6 +37,8 @@ http://127.0.0.1:8009/wol/c4:d9:87:7a:78:35          // sends a wake-on-lan magi
 
 (all available endpoints are displayed in the logs of the process when it starts)
 
+![Example of HTTP endpoint](sleep-on-lan-http.png)
+
 ## Configuration
 
 An optional configuration file may be used. See [configuration examples](resources/configuration/default/). Order of priority for configuration filenames are : 
