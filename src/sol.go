@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/integrii/flaggy"
 	"github.com/labstack/gommon/color"
@@ -32,10 +33,18 @@ func ExitDaemon(s string) {
 	exit <- true
 }
 
+func LocalLoggoFormatter(entry loggo.Entry) string {
+	ts := entry.Timestamp.In(time.Local).Format("2006-01-02 15:04:05")
+	// Just get the basename from the filename
+	filename := filepath.Base(entry.Filename)
+	return fmt.Sprintf("%s %s %s %s:%d %s", ts, entry.Level, entry.Module, filename, entry.Line, entry.Message)
+}
+
 func init() {
 
 	// Preinit loggers with default value (will be later overridden per configuration, if needed)
 	logger.SetLogLevel(loggo.INFO)
+	loggo.ReplaceDefaultWriter(loggo.NewSimpleWriter(os.Stderr, LocalLoggoFormatter))
 
 	// Init flag reader
 	flaggy.String(&configurationFileNameFromCommandLine, "c", "config", "Configuration file to use (optional, default is 'sol.json' next to the binary)")
