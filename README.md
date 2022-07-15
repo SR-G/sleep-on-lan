@@ -32,12 +32,19 @@ If this HTTP listener is activated, the Sleep-On-Lan process then exposes a few 
 
 <pre>http://127.0.0.1:8009/                               // index page, just shows local IP / mac
 http://127.0.0.1:8009/sleep                          // remotely sleep this computer through this URL
+http://127.0.0.1:8009/quit                           // sleep-on-lan will be exited
 http://127.0.0.1:8009/wol/c4:d9:87:7a:78:35          // sends a wake-on-lan magic packet on the network to the provided mac address
+http://127.0.0.1:8009/state/local                    // will output the local state of that server, in order to remotely knows if the server is alive or not
+http://127.0.0.1:8009/state/ip/:ip                   // will output the local state of a remoter server for which IP is provided
 </pre>
 
 (all available endpoints are displayed in the logs of the process when it starts)
 
 ![Example of HTTP endpoint](sleep-on-lan-http.png)
+
+You can then easily send any computer running Sleep-On-LAN with an HTTP request, with CURL or anything else : `curl http://192.168.8.4:8009/sleep/`, for example.
+
+All other registered custom commands (per configuration) can be triggered in the same way.
 
 ## Configuration
 
