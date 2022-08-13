@@ -392,5 +392,5 @@ git push origin master
 git tag 1.1.0-RELEASE 
 git push origin 1.1.0-RELEASE 
 ```
-- Create distribution `make distribution` and upload the ZIP generated under `bin/*.zip` on GitHub
+- Create distribution `export GOPATH=~/go/ ; make distribution` and upload the ZIP generated under `bin/*.zip` on GitHub
 - Change Makefile (increase number, switch back to SNAPSHOT)
