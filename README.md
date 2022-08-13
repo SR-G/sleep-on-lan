@@ -299,6 +299,10 @@ Just launch either `sol generate-configuration` (console output) or `sol --confi
     "AvoidDualUDPSending": {
         "Active": false,
         "Delay": "100ms"
+    },
+    "DelayBeforeCommands": {
+        "Active": true,
+        "Delay": "500ms"
     }
 }
 ```
