@@ -220,10 +220,11 @@ func ListenHTTP(port int) {
 
 					if configuration.DelayBeforeCommands.Active {
 						logger.Infof("Executing [" + colorer.Green(operation) + "] with preliminary delay of [" + colorer.Green(configuration.DelayBeforeCommands.Delay) + "]")
-						ExecuteActionWithDelay(availableCommand)
+						// we still need "go" in order to not be blocking here...
+						go ExecuteActionWithDelay(availableCommand)
 					} else {
 						logger.Infof("Executing [" + colorer.Green(operation) + "]")
-						defer ExecuteCommand(availableCommand)
+						go ExecuteCommand(availableCommand)
 					}
 
 					break

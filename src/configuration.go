@@ -68,7 +68,7 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.HTTPOutput = "XML"
 	conf.ExitIfAnyPortIsAlreadyUsed = false
 	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{Active: false, Delay: "100ms"}
-	conf.DelayBeforeCommands = DelayBeforeCommandsConfiguration{Active: true, Delay: "100ms"}
+	conf.DelayBeforeCommands = DelayBeforeCommandsConfiguration{Active: true, Delay: "500ms"}
 	// default commands are registered on Parse() method, depending on the current operating system
 }
 
@@ -177,6 +177,13 @@ func (conf *Configuration) Parse() error {
 		logger.Infof("Avoid dual UDP sending enabled, delay is [" + colorer.Green(conf.AvoidDualUDPSending.Delay) + "]")
 	} else {
 		logger.Debugf("Avoid dual UDP sending not enabled")
+	}
+
+	// Delay Before Commands
+	if conf.DelayBeforeCommands.Active {
+		logger.Infof("Extra delay before commands is activated, delay is [" + colorer.Green(conf.DelayBeforeCommands.Delay) + "]")
+	} else {
+		logger.Debugf("Extra delay before commands not activated")
 	}
 
 	return nil
