@@ -134,12 +134,11 @@ func pingIp(ip string) *RestStateResult {
 	return result
 }
 
-/*
-func executeCommandWithDelay(availableCommand CommandConfiguration) {
-	time.Sleep(250 * time.Millisecond)
+func ExecuteActionWithDelay(availableCommand CommandConfiguration) {
+	delay, _ := time.ParseDuration(configuration.DelayBeforeCommands.Delay)
+	time.Sleep(delay)
 	ExecuteCommand(availableCommand)
 }
-*/
 
 func ListenHTTP(port int) {
 	// externalIp, _ := ExternalIP()
@@ -218,8 +217,15 @@ func ListenHTTP(port int) {
 			for idx := range configuration.Commands {
 				availableCommand := configuration.Commands[idx]
 				if availableCommand.Operation == operation {
-					logger.Infof("Executing [" + operation + "]")
-					defer ExecuteCommand(availableCommand)
+
+					if configuration.DelayBeforeCommands.Active {
+						logger.Infof("Executing [" + colorer.Green(operation) + "] with preliminary delay of [" + colorer.Green(configuration.DelayBeforeCommands.Delay) + "]")
+						ExecuteActionWithDelay(availableCommand)
+					} else {
+						logger.Infof("Executing [" + colorer.Green(operation) + "]")
+						defer ExecuteCommand(availableCommand)
+					}
+
 					break
 				}
 			}

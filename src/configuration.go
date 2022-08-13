@@ -24,13 +24,19 @@ type Configuration struct {
 	Auth                       AuthConfiguration      // optional
 	HTTPOutput                 string
 	AvoidDualUDPSending        AvoidDualUDPSendingConfiguration
+	DelayBeforeCommands        DelayBeforeCommandsConfiguration
 
 	listenersConfiguration []ListenerConfiguration // converted once parsed from Listeners (= internal representation, not an external configuration)
 }
 
 type AvoidDualUDPSendingConfiguration struct {
-	AvoidDualUDPSendingActive bool   `json:"Active"`
-	AvoidDualUDPSendingDelay  string `json:"Delay"`
+	Active bool   `json:"Active"`
+	Delay  string `json:"Delay"`
+}
+
+type DelayBeforeCommandsConfiguration struct {
+	Active bool   `json:"Active"`
+	Delay  string `json:"Delay"`
 }
 
 type AuthConfiguration struct {
@@ -61,7 +67,8 @@ func (conf *Configuration) InitDefaultConfiguration() {
 	conf.BroadcastIP = "192.168.255.255"
 	conf.HTTPOutput = "XML"
 	conf.ExitIfAnyPortIsAlreadyUsed = false
-	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{AvoidDualUDPSendingActive: false, AvoidDualUDPSendingDelay: "100ms"}
+	conf.AvoidDualUDPSending = AvoidDualUDPSendingConfiguration{Active: false, Delay: "100ms"}
+	conf.DelayBeforeCommands = DelayBeforeCommandsConfiguration{Active: true, Delay: "100ms"}
 	// default commands are registered on Parse() method, depending on the current operating system
 }
 
@@ -166,8 +173,8 @@ func (conf *Configuration) Parse() error {
 	}
 
 	// Avoid dual UDP sending
-	if conf.AvoidDualUDPSending.AvoidDualUDPSendingActive {
-		logger.Infof("Avoid dual UDP sending enabled, delay is [" + colorer.Green(conf.AvoidDualUDPSending.AvoidDualUDPSendingDelay) + "]")
+	if conf.AvoidDualUDPSending.Active {
+		logger.Infof("Avoid dual UDP sending enabled, delay is [" + colorer.Green(conf.AvoidDualUDPSending.Delay) + "]")
 	} else {
 		logger.Debugf("Avoid dual UDP sending not enabled")
 	}

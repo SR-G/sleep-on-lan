@@ -37,11 +37,11 @@ func ListenUDP(port int) {
 			logger.Infof("Received a MAC address from IP [" + colorer.Green(remote.String()) + "], extracted mac [" + colorer.Green(extractedMacAddress.String()) + "]")
 			if matchAddress(extractedMacAddress) {
 				logger.Infof("(reversed) received MAC address match a local address")
-				if configuration.AvoidDualUDPSending.AvoidDualUDPSendingActive {
+				if configuration.AvoidDualUDPSending.Active {
 					// Specific behavior : let's try to avoid dual UDP sending
 					if !isActionInProgress {
 						isActionInProgress = true
-						logger.Infof("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + colorer.Green(configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay) + "]")
+						logger.Infof("Extra small delay before going to sleep (to avoid dual UDP sending), during [" + colorer.Green(configuration.AvoidDualUDPSending.Delay) + "]")
 						go doActionWithDelay()
 					} else {
 						logger.Infof("Another command is already awaiting, rejecting this one due to dual UDP sending avoidance being activated")
@@ -56,7 +56,7 @@ func ListenUDP(port int) {
 }
 
 func doActionWithDelay() {
-	delay, _ := time.ParseDuration(configuration.AvoidDualUDPSending.AvoidDualUDPSendingDelay)
+	delay, _ := time.ParseDuration(configuration.AvoidDualUDPSending.Delay)
 	time.Sleep(delay)
 	doAction()
 }
