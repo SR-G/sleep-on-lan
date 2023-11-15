@@ -218,6 +218,8 @@ nohup /path/to/sol_binary &gt; /var/log/sleep-on-lan.log 2&gt;&1 &
 
 So to summarize : if you are facing the error inside logs `listen udp :9: bind: permission denied`, you either need to run the program as root, either to apply the proper setcap permission.
 
+<!-- TODO: document how to use UDP on macOS -->
+
 #### Daemonization
 
 You may of course daemonize the process or launch it through an external monitor :
