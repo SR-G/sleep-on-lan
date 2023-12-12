@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -31,9 +32,14 @@ func ListenUDP(port int) {
 		for {
 			rlen, remote, err := sock.ReadFromUDP(buf[:])
 			if err != nil {
-				logger.Errorf("Error while reading :", err.Error())
+				logger.Errorf("Error while reading: %v", err.Error())
+				continue
 			}
-			extractedMacAddress, _ := extractMacAddress(rlen, buf)
+			extractedMacAddress, err := extractMacAddress(rlen, buf)
+			if err != nil {
+				logger.Errorf("Error while extracting MAC address: %v", err.Error())
+				continue
+			}
 			logger.Infof("Received a MAC address from IP [" + colorer.Green(remote.String()) + "], extracted mac [" + colorer.Green(extractedMacAddress.String()) + "]")
 			if matchAddress(extractedMacAddress) {
 				logger.Infof("(reversed) received MAC address match a local address")
@@ -87,7 +93,7 @@ func extractMacAddress(rlen int, buf [1024]byte) (net.HardwareAddr, error) {
 			sep = ":"
 		}
 	} else {
-		logger.Errorf("Received buffer too small, size [" + strconv.Itoa(rlen) + "]")
+		return nil, fmt.Errorf("received buffer too small, size [%d]", rlen)
 	}
 	return net.ParseMAC(r)
 }
