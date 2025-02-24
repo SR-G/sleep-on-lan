@@ -42,7 +42,7 @@ func ListenUDP(port int) {
 			}
 			logger.Infof("Received a MAC address from IP [" + colorer.Green(remote.String()) + "], extracted mac [" + colorer.Green(extractedMacAddress.String()) + "]")
 			if matchAddress(extractedMacAddress) {
-				logger.Infof("(reversed) received MAC address match a local address")
+				logger.Infof("(reversed) received MAC address matches a local address")
 				if configuration.AvoidDualUDPSending.Active {
 					// Specific behavior : let's try to avoid dual UDP sending
 					if !isActionInProgress {
@@ -69,13 +69,15 @@ func doActionWithDelay() {
 
 func matchAddress(receivedAddress net.HardwareAddr) bool {
 	receivedAddressAsString := receivedAddress.String()
-	for _, value := range LocalNetworkMap() {
-		if strings.HasPrefix(value, receivedAddressAsString) {
-			return true
+	if len(receivedAddressAsString) > 0 { // corner case where we receive a UDP packet but not being a WOL/SOL one (so no address extractable from it)
+		for _, value := range LocalNetworkMap() {
+			if strings.HasPrefix(value, receivedAddressAsString) {
+				return true
+			}
+			/*if bytes.Equal(receivedAddress, inter.HardwareAddr) {
+				return true
+			}*/
 		}
-		/*if bytes.Equal(receivedAddress, inter.HardwareAddr) {
-			return true
-		}*/
 	}
 
 	return false
@@ -99,8 +101,7 @@ func extractMacAddress(rlen int, buf [1024]byte) (net.HardwareAddr, error) {
 }
 
 func leftPad2Len(s string, padStr string, overallLen int) string {
-	var padCountInt int
-	padCountInt = 1 + ((overallLen - len(padStr)) / len(padStr))
+	padCountInt := 1 + ((overallLen - len(padStr)) / len(padStr))
 	var retStr = strings.Repeat(padStr, padCountInt) + s
 	return retStr[(len(retStr) - overallLen):]
 }

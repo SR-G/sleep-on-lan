@@ -57,9 +57,9 @@ type RestResultListenerConfiguration struct {
 type RestResult struct {
 	XMLName              xml.Name `xml:"result" json:"-"`
 	Application          string   `xml:"application"`
-	Version              string   `xml:"version,omitifempty"`
-	CompilationTimestamp string   `xml:"compilation-timestamp,omitifempty"`
-	Commit               string   `xml:"commit,omitifempty"`
+	Version              string   `xml:"version,omitempty"`
+	CompilationTimestamp string   `xml:"compilation-timestamp,omitempty"`
+	Commit               string   `xml:"commit,omitempty"`
 	Hosts                RestResultHosts
 	Listeners            RestResultListeners
 	Commands             RestResultCommands

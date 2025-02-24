@@ -6,7 +6,7 @@ import (
 )
 
 // These variables are injected through Makefile at compile time
-var BuildVersion = "1.0.7"
+var BuildVersion = "1.1.2"
 var BuildVersionLabel = "SNAPSHOT"
 var BuildCommit = ""
 var BuildCompilationTimestamp = ""
@@ -25,7 +25,7 @@ var Version = version{ApplicationName: "sleep-on-lan", Version: BuildVersion, Ve
 
 func (v version) DumpVersion() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s", v.Version))
+	buf.WriteString(v.Version)
 	if v.VersionLabel != "" {
 		buf.WriteString("-" + v.VersionLabel)
 	}
@@ -34,7 +34,7 @@ func (v version) DumpVersion() string {
 
 func (v version) GetVersion() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s", v.Version))
+	buf.WriteString(v.Version)
 	if v.VersionLabel != "" {
 		buf.WriteString("-" + v.VersionLabel)
 	}

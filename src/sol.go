@@ -124,9 +124,7 @@ func determineConfigurationFileName() string {
 		logger.Infof("Configuration filename provided through --config parameter [" + colorer.Green(configurationFileNameFromCommandLine) + "]")
 		possibleConfigurationFileNames = append(possibleConfigurationFileNames, PossibleConfigurationFilename{configurationFileNameFromCommandLine, "configuration filename provided through --config parameter"})
 	}
-	for _, extraPossibleConfigurationFileName := range RegisterPossibleConfigurationFileNames() {
-		possibleConfigurationFileNames = append(possibleConfigurationFileNames, extraPossibleConfigurationFileName)
-	}
+	possibleConfigurationFileNames = append(possibleConfigurationFileNames, RegisterPossibleConfigurationFileNames()...)
 	possibleConfigurationFileNames = append(possibleConfigurationFileNames, PossibleConfigurationFilename{dir + string(os.PathSeparator) + configurationFileName, "configuration file stored alongisde SleepOnLan binary"}) // alongside binary
 
 	for _, possibleConfigurationFilename := range possibleConfigurationFileNames {

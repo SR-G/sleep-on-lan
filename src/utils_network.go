@@ -79,7 +79,7 @@ func GetInterfaceByName(name string) *net.Interface {
 func GetInterfaceByHardwareAddress(mac string) (net.Interface, error) {
 	interfaces := GetInterfaces()
 	for _, iface := range interfaces {
-		if strings.ToUpper(mac) == strings.ToUpper(iface.HardwareAddr.String()) {
+		if strings.EqualFold(mac, iface.HardwareAddr.String()) {
 			return iface, nil
 		}
 	}
