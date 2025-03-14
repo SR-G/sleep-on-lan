@@ -4,17 +4,17 @@
 
 Wake-on-LAN is a standard low-level protocol implemented in various hardware. At this time, there is not standard to make the opposite and send a computer in sleep mode.
 
-This project allows a windows or linux box to be put into sleep from any other device. 
+This project allows a macOS, windows or linux box to be put into sleep from any other device.
 
 It works with the exact same magic packet than for Wake-On-LAN, the only difference is that the MAC address has to be written in reverse order.
 
 Technically, you have to run a little daemon (the `sleep-on-lan` program on your computeri, server, NAS, ... that will listen the same Wake-On-LAN port and send the computer in sleep mode when the reversed MAC address received matches a local address. Additionnaly, it can also be triggered through a REST endpoint (with something like `curl`). Executed commands are fully customizable.
 
-Written in `go`, the code shoud run on linux and windows platforms.
+Written in `go`, the code shoud run on macOS, linux and windows platforms.
 
 ## Usage
 
-Grab the latest windows + linux release or snapshot : https://github.com/SR-G/sleep-on-lan/releases/
+Grab the latest macos + windows + linux release or snapshot : https://github.com/SR-G/sleep-on-lan/releases/
 
 ### Sleep through UDP
 
@@ -48,11 +48,11 @@ All other registered custom commands (per configuration) can be triggered in the
 
 ## Configuration
 
-An optional configuration file may be used. See [configuration examples](resources/configuration/default/). Order of priority for configuration filenames are : 
+An optional configuration file may be used. See [configuration examples](resources/configuration/default/). Order of priority for configuration filenames are :
 
 1. The filename manually configured inside the command line with the `--config` parameter (if available on disk)
-2. (linux only) A filename under `/etc/sol.json` (if available on disk)
-3. (linux only) A filename under `/etc/sleep-on-lan.json` (if available on disk)
+2. (linux/macOS only) A filename under `/etc/sol.json` (if available on disk)
+3. (linux/macOS only) A filename under `/etc/sleep-on-lan.json` (if available on disk)
 4. A filename alongside the `sol` binary (i.e., in the same folder) and named `sol.json` (if available on disk)
 5. Otherwise, default values will be taken in account
 
@@ -78,7 +78,7 @@ Content of configuration is as follow (everything is optional / below is the who
 **Listeners** defines which mechanism will be activated
 
 - UDP         : will listen on the default port (= 9)
-- UDP:&lt;port&gt;  : will listen on the provided port 
+- UDP:&lt;port&gt;  : will listen on the provided port
 - HTTP        : will listen on the default port (= 8009)
 - HTTP:&lt;port&gt; : will listen on the provided port
 
@@ -88,7 +88,7 @@ If no configuration file is provided, UDP:9 and HTTP:8009 are assumed by default
 
 The REST services are exposed on 0.0.0.0 and are thus accessibles from http://localhost/, http://127.0.0.1/, http://192.168.1.x/ and so on.
 
-Rest service may be secured if needed through an optional `Auth` configuration (a `Basic Auth` is triggered on all REST services as soon as this `Auth` section is defined) : 
+Rest service may be secured if needed through an optional `Auth` configuration (a `Basic Auth` is triggered on all REST services as soon as this `Auth` section is defined) :
 
 <pre>{
   "Listeners" : ["UDP:9", "HTTP:8009" ],
@@ -99,7 +99,7 @@ Rest service may be secured if needed through an optional `Auth` configuration (
 }
 </pre>
 
-Authed REST may still be triggered from a remote host, if needed, through : 
+Authed REST may still be triggered from a remote host, if needed, through :
 
 ```
 curl http://myusername:mypassword@<IP>/sleep/
@@ -127,7 +127,7 @@ Default output from REST command is `XML` but may be switched from a configurati
 
 **Commands** defines the available commands.
 
-By default, on both windows and linux, only one command is defined : sleep command (through `systemctl suspend` on (recent) systemd linux, `pm-suspend` on (old) linux and a DLL API call on windows).
+By default, on macOS, windows and linux, only one command is defined : sleep command (through `pmset sleepnow` on macOS, `systemctl suspend` on (recent) systemd linux, `pm-suspend` on (old) linux and a DLL API call on windows).
 
 You may customize / override this behavior, or add new commands (that will then be available under `http://<IP>:<HTTP PORT>/<operation>` if a HTTP listener is defined), if needed.
 
@@ -140,7 +140,7 @@ Each command has 4 attributes :
 Example 1 : only one (default) operation that will shutdown the system on windows. Through HTTP, the operation will be triggerable with `http://<IP>:<PORT_HTTP>/halt/`.
 
 <pre>
-  "Commands" : [ 
+  "Commands" : [
     {
         "Operation" : "halt",
         "Command" : "C:\\Windows\\System32\\Shutdown.exe -s -t 0"
@@ -150,7 +150,7 @@ Example 1 : only one (default) operation that will shutdown the system on window
 Example 2 : force sleep on windows through the rundll32.exe trick (and not through the default API call)
 
 <pre>
-  "Commands" : [ 
+  "Commands" : [
     {
         "Operation" : "sleep",
         "Command" : "C:\\Windows\\System32\\rundll32.exe powrprof.dll,SetSuspendState 0,1,1"
@@ -160,7 +160,7 @@ Example 2 : force sleep on windows through the rundll32.exe trick (and not throu
 Example 3 : default operation will put the computer to sleep on linux and a second operation will be published to shutdown the computer through HTTP.
 
 <pre>
-  "Commands" : [ 
+  "Commands" : [
     {
         "Operation" : "halt",
         "Command" : "pm-halt",
@@ -189,12 +189,12 @@ Installation example :
 <pre>c:\Tools\nssm\2.24\win64\nssm.exe install SleepOnLan c:\Tools\Sleep-On-Lan\sol.exe
 </pre>
 
-Removal example : 
+Removal example :
 
 <pre>c:\Tools\nssm\2.24\win64\nssm.exe remove SleepOnLan confirm
 </pre>
 
-Configure logs of the service in an external file (adjust the paths as needed) : 
+Configure logs of the service in an external file (adjust the paths as needed) :
 
 <pre>C:\Tools\nssm\2.24\win64\nssm.exe set SleepOnLan AppStdout "C:\Tools\SleepOnLan\sleeponlan-windows.log"
 C:\Tools\nssm\2.24\win64\nssm.exe set SleepOnLan AppStderr "C:\Tools\SleepOnLan\sleeponlan-windows.log"
@@ -218,10 +218,12 @@ nohup /path/to/sol_binary &gt; /var/log/sleep-on-lan.log 2&gt;&1 &
 
 So to summarize : if you are facing the error inside logs `listen udp :9: bind: permission denied`, you either need to run the program as root, either to apply the proper setcap permission.
 
+<!-- TODO: document how to use UDP on macOS -->
+
 #### Daemonization
 
-You may of course daemonize the process or launch it through an external monitor : 
-- [monit](http://mmonit.com/monit/) 
+You may of course daemonize the process or launch it through an external monitor :
+- [monit](http://mmonit.com/monit/)
 - [supervisor](http://supervisord.org/introduction.html)
 - [systemctl](https://www.freedesktop.org/software/systemd/man/systemctl.html)
   1. Create the file `/etc/systemd/system/sleep-on-lan.service` with the following content (adjust the path accordingly to your installation)
@@ -238,7 +240,7 @@ You may of course daemonize the process or launch it through an external monitor
       [Install]
       WantedBy=multi-user.target
       ```
-  2. Refresh configuration, activate service at runtime and start it : 
+  2. Refresh configuration, activate service at runtime and start it :
       ```bash
       systemctl daemon-reload
       systemctl enable sleep-on-lan.service
@@ -252,7 +254,7 @@ You may of course daemonize the process or launch it through an external monitor
 
 ### Available commands
 
-Just launch `sol help` : 
+Just launch `sol help` :
 
 ```
 Sleep-On-LAN - Daemon allowing to send a linux or windows computer to sleep
@@ -260,10 +262,10 @@ Sleep-On-LAN - Daemon allowing to send a linux or windows computer to sleep
   Usage:
     Sleep-On-LAN [generate-configuration]
 
-  Subcommands: 
+  Subcommands:
     generate-configuration   Generate a default configuration JSON file
 
-  Flags: 
+  Flags:
        --version   Displays the program version string.
     -h --help      Displays help with available flag, subcommand, and positional value parameters.
     -c --config    Configuration file to use (optional, default is 'sol.json' next to the binary)
@@ -313,7 +315,7 @@ If Sleep-on-LAN cannot be triggered remotely, but the service is running and the
 
 ### Logs
 
-Expected logs when starting the process should be : 
+Expected logs when starting the process should be :
 
 ![Example of start logs](sleep-on-lan-start-logs.png)
 
@@ -349,7 +351,7 @@ Switch  Network_SoL_Laptop   	"Sleep PC (laptop)"   <sleep>		(WoL, Status, Netwo
 
 ### Regular operations
 
-A few commands are available through the provided `Makefile` : 
+A few commands are available through the provided `Makefile` :
 
 - Launch a `golang` docker container (to be executed from host) :
 
@@ -369,13 +371,13 @@ make install
 make distribution
 ```
 
-- Clean everything : 
+- Clean everything :
 
 ```bash
 make clean
 ```
 
-- Launch the generated binary (from the inside of the container) : 
+- Launch the generated binary (from the inside of the container) :
 
 ```bash
 make run
@@ -389,8 +391,8 @@ make run
 git add .
 git commit -m"Prepare 1.1.0 RELEASE"
 git push origin master
-git tag 1.1.0-RELEASE 
-git push origin 1.1.0-RELEASE 
+git tag 1.1.0-RELEASE
+git push origin 1.1.0-RELEASE
 ```
 - Create distribution `export GOPATH=~/go/ ; make distribution` and upload the ZIP generated under `bin/*.zip` on GitHub
 - Change Makefile (increase number, switch back to SNAPSHOT)
