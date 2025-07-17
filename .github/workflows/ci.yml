@@ -2,9 +2,9 @@ name: Build and Release SleepOnLAN
 
 on:
   push:
-    branches: [main]
+    branches: [master, release/**]
   pull_request:
-    branches: [main]
+    branches: [master, release/**]
 
 env:
   PACKAGE: sleep-on-lan
