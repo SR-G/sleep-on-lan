@@ -95,8 +95,18 @@ jobs:
       - name: 📝 Copy configuration and scripts
         run: |
           TARGET=bin/${{ matrix.goos }}_${{ matrix.goarch }}
-          cp resources/configuration/default/sol-basic-configuration.json "$TARGET/sol.json"
-          [[ "${{ matrix.goos }}" == "windows" ]] && cp resources/script/*.bat "$TARGET/"
+          CONFIG="resources/configuration/default/sol-basic-configuration.json"
+
+          if [[ -f "$CONFIG" ]]; then
+            cp "$CONFIG" "$TARGET/sol.json"
+          else
+            echo "❌ Missing configuration file: $CONFIG"
+            exit 1
+          fi
+
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            cp resources/script/*.bat "$TARGET/" || echo "⚠️ No batch scripts found."
+          fi
 
       - name: 📚 Archive binaries
         run: |
