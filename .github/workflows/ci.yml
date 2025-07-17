@@ -39,6 +39,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+          default_prerelease_bump: false
 
       - name: 🧠 Set version environment
         run: echo "VERSION=${{ steps.tagger.outputs.new_tag }}" >> $GITHUB_ENV
