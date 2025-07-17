@@ -2,7 +2,7 @@ name: Build and Release SleepOnLAN
 
 on:
   push:
-    branches: [master, release/**]
+    branches: [master, release/**, ci-testing]
   pull_request:
     branches: [master, release/**]
 
@@ -48,6 +48,7 @@ jobs:
             echo "VERSION_LABEL=RELEASE" >> $GITHUB_ENV
           else
             echo "VERSION_LABEL=SNAPSHOT" >> $GITHUB_ENV
+          fi
         env:
           GITHUB_REF: ${{ github.ref }}
 
