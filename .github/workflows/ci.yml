@@ -129,22 +129,27 @@ jobs:
     name: 🚀 Create GitHub Release
     runs-on: ubuntu-latest
     needs: [build, versioning]
-    if: needs.versioning.outputs.version != ''
+    if: |
+      startsWith(github.ref, 'refs/heads/master') ||
+      startsWith(github.ref, 'refs/heads/release/') ||
+      startsWith(github.ref, 'refs/heads/nightly') ||
+      github.event_name == 'workflow_dispatch'
 
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: 📥 Download all artifacts
+      - name: 📥 Download all artifacts (flattened)
         uses: actions/download-artifact@v4
         with:
           path: dist
+          merge-multiple: true
 
-      - name: 🔒 Generate checksums
+      - name: 🔒 Generate SHA256 checksums
         run: |
-          cd dist
-          find . -name '*.zip' -exec sha256sum {} \; > checksums.txt
-          echo "✅ SHA256 checksums generated."
+          mkdir -p dist
+          find dist -name '*.zip' -exec sha256sum {} \; > dist/checksums.txt
+          echo "✅ SHA256 checksums written to dist/checksums.txt"
 
       - name: 🚀 Publish GitHub Release
         uses: softprops/action-gh-release@v1
@@ -152,7 +157,10 @@ jobs:
           tag_name: ${{ needs.versioning.outputs.version }}
           name: SleepOnLAN ${{ needs.versioning.outputs.version }}
           body_path: dist/checksums.txt
-          prerelease: ${{ github.ref_name != 'master' }}
+          prerelease: ${{ startsWith(github.ref, 'refs/heads/nightly') || github.event_name == 'workflow_dispatch' }}
           files: dist/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
