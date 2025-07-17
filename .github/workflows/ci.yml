@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.tagger.outputs.new_tag }}
-
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
@@ -31,7 +30,7 @@ jobs:
           default_prerelease_bump: false
 
   build:
-    name: 🏗️ Cross-platform Build
+    name: 🏗️ Build on ${{ matrix.goos }} / ${{ matrix.goarch }}
     runs-on: ubuntu-latest
     needs: versioning
 
@@ -47,7 +46,6 @@ jobs:
 
     env:
       VERSION: ${{ needs.versioning.outputs.version }}
-      GOPATH: ${{ github.workspace }}
       PACKAGE: sleep-on-lan
       GO111MODULE: on
 
@@ -57,13 +55,7 @@ jobs:
 
       - name: 🧠 Set release label
         run: |
-          if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
-            echo "VERSION_LABEL=RELEASE" >> $GITHUB_ENV
-          else
-            echo "VERSION_LABEL=SNAPSHOT" >> $GITHUB_ENV
-          fi
-        env:
-          GITHUB_REF: ${{ github.ref }}
+          echo "VERSION_LABEL=${{ github.ref_name == 'master' && 'RELEASE' || 'SNAPSHOT' }}" >> $GITHUB_ENV
 
       - name: 🧰 Set up Go
         uses: actions/setup-go@v5
@@ -76,92 +68,52 @@ jobs:
           cd src
           go mod tidy
 
-      - name: 🧼 Prepare directories
-        run: mkdir -p bin/${{ matrix.goos }}_${{ matrix.goarch }}
-
       - name: 🔧 Build binary
         run: |
+          cd src
           BUILD_TIME=$(date "+%FT%T%z")
           COMMIT=$(git rev-parse HEAD)
-          BIN_DIR="bin/${{ matrix.goos }}_${{ matrix.goarch }}"
+          BIN_DIR="../bin/${{ matrix.goos }}_${{ matrix.goarch }}"
           OUTPUT="$BIN_DIR/sol"
-          if [[ "${{ matrix.goos }}" == "windows" ]]; then
-            OUTPUT="${OUTPUT}.exe"
-          fi
+          [[ "${{ matrix.goos }}" == "windows" ]] && OUTPUT="${OUTPUT}.exe"
 
+          mkdir -p "$BIN_DIR"
           LDFLAGS="-s -w \
             -X 'main.BuildCommit=${COMMIT}' \
             -X 'main.BuildVersion=${VERSION}' \
             -X 'main.BuildVersionLabel=${VERSION_LABEL}' \
             -X 'main.BuildCompilationTimestamp=${BUILD_TIME}'"
-
-          mkdir -p "$BIN_DIR"
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-            go build -tags netgo -ldflags "${LDFLAGS}" -o "$OUTPUT" ./src
+            go build -tags netgo -ldflags "${LDFLAGS}" -o "$OUTPUT" .
 
       - name: ✅ Verify binary exists
         run: |
           OUTPUT="bin/${{ matrix.goos }}_${{ matrix.goarch }}/sol"
-          if [[ "${{ matrix.goos }}" == "windows" ]]; then
-            OUTPUT="${OUTPUT}.exe"
-          fi
-          if [[ -f "$OUTPUT" ]]; then
-            echo "✅ Binary exists: $OUTPUT"
-          else
-            echo "❌ Binary missing: $OUTPUT"
-            exit 1
-          fi
-
-      - name: 📦 Copy binary (validated)
-        run: |
-          BIN_DIR=bin/${{ matrix.goos }}_${{ matrix.goarch }}
-          if [[ "${{ matrix.goos }}" == "windows" ]]; then
-            BIN_PATH="$GOPATH/bin/windows_${{ matrix.goarch }}/${PACKAGE}.exe"
-            if [[ -f "$BIN_PATH" ]]; then
-              cp "$BIN_PATH" "$BIN_DIR/sol.exe"
-            else
-              echo "❌ Binary not found: $BIN_PATH"
-              exit 1
-            fi
-          else
-            BIN_PATH="$GOPATH/bin/${PACKAGE}"
-            if [[ -f "$BIN_PATH" ]]; then
-              cp "$BIN_PATH" "$BIN_DIR/sol"
-            else
-              echo "❌ Binary not found: $BIN_PATH"
-              exit 1
-            fi
-          fi
+          [[ "${{ matrix.goos }}" == "windows" ]] && OUTPUT="${OUTPUT}.exe"
+          [[ -f "$OUTPUT" ]] && echo "✅ Binary exists: $OUTPUT" || (echo "❌ Missing binary: $OUTPUT"; exit 1)
 
       - name: 📝 Copy configuration and scripts
         run: |
           TARGET=bin/${{ matrix.goos }}_${{ matrix.goarch }}
-          cp resources/configuration/default/sol-basic-configuration.json $TARGET/sol.json
-          if [[ "${{ matrix.goos }}" == "windows" ]]; then
-            cp resources/script/*.bat $TARGET/
-          fi
+          cp resources/configuration/default/sol-basic-configuration.json "$TARGET/sol.json"
+          [[ "${{ matrix.goos }}" == "windows" ]] && cp resources/script/*.bat "$TARGET/"
 
       - name: 📚 Archive binaries
         run: |
           cd bin
-          ZIP_NAME="SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
-          zip -r -9 "$ZIP_NAME" "./${{ matrix.goos }}_${{ matrix.goarch }}/"
+          ZIP="SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          zip -r -9 "$ZIP" "./${{ matrix.goos }}_${{ matrix.goarch }}/"
 
       - name: ✅ Verify zip archive
         run: |
-          ZIP_NAME="SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
-          if [[ -f "bin/$ZIP_NAME" ]]; then
-            echo "✅ Found zip archive: bin/$ZIP_NAME"
-          else
-            echo "❌ Missing zip archive: bin/$ZIP_NAME"
-            exit 1
-          fi
+          ZIP="bin/SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          [[ -f "$ZIP" ]] && echo "✅ Found zip archive: $ZIP" || (echo "❌ Missing zip: $ZIP"; exit 1)
 
-      - name: 📤 Upload distribution zip
+      - name: 📤 Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SleepOnLAN-${{ env.VERSION }}-${{ env.VERSION_LABEL }}-${{ matrix.goos }}_${{ matrix.goarch }}
-          path: bin/SleepOnLAN-${{ env.VERSION }}-${{ env.VERSION_LABEL }}-${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          name: SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}
+          path: bin/SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
   release:
     name: 🚀 Create GitHub Release
@@ -173,24 +125,24 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: 📥 Download all build artifacts
+      - name: 📥 Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
+
+      - name: 🔒 Generate checksums
+        run: |
+          cd dist
+          find . -name '*.zip' -exec sha256sum {} \; > checksums.txt
+          echo "✅ SHA256 checksums generated."
 
       - name: 🚀 Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.versioning.outputs.version }}
           name: SleepOnLAN ${{ needs.versioning.outputs.version }}
-          body: |
-            🎉 New version release of SleepOnLAN!
-            Version: `${{ needs.versioning.outputs.version }}`
-
-            Includes:
-            - Cross-platform binaries for Linux and Windows
-            - Configuration files and batch scripts
-          prerelease: ${{ env.VERSION_LABEL != 'RELEASE' }}
+          body_path: dist/checksums.txt
+          prerelease: ${{ github.ref_name != 'master' }}
           files: dist/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
