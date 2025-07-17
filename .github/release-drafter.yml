@@ -1,0 +1,17 @@
+name-template: 'SleepOnLAN v$NEXT_PATCH_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
+categories:
+  - title: 🚀 Features
+    labels: [feature]
+  - title: 🐛 Bug Fixes
+    labels: [fix]
+  - title: 📦 Maintenance
+    labels: [chore]
+  - title: 🧪 Tests
+    labels: [test]
+  - title: 🧹 Refactoring
+    labels: [refactor]
+  - title: 📖 Documentation
+    labels: [docs]
+change-template: '- $TITLE (#$NUMBER)'
+no-changes-template: 'No user-facing changes.'
