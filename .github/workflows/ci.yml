@@ -61,6 +61,7 @@ jobs:
             echo "VERSION_LABEL=RELEASE" >> $GITHUB_ENV
           else
             echo "VERSION_LABEL=SNAPSHOT" >> $GITHUB_ENV
+          fi
         env:
           GITHUB_REF: ${{ github.ref }}
 
