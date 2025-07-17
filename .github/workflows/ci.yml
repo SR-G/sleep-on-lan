@@ -5,6 +5,7 @@ on:
     branches: [master, release/**, ci-testing]
   pull_request:
     branches: [master, release/**]
+  workflow_dispatch:
 
 env:
   PACKAGE: sleep-on-lan
