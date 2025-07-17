@@ -89,7 +89,12 @@ jobs:
             -X 'main.BuildVersion=${VERSION}' \
             -X 'main.BuildVersionLabel=${VERSION_LABEL}' \
             -X 'main.BuildCompilationTimestamp=${BUILD_TIME}'"
-          GOARCH=${{ matrix.goarch }} GOOS=${{ matrix.goos }} go install -a -tags netgo -installsuffix netgo -ldflags "${LDFLAGS}" $PACKAGE
+          OUTPUT="../bin/${{ matrix.goos }}_${{ matrix.goarch }}/sol"
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            OUTPUT="${OUTPUT}.exe"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+            go build -tags netgo -ldflags "${LDFLAGS}" -o "$OUTPUT" $PACKAGE
 
       - name: 📦 Copy binary (validated)
         run: |
