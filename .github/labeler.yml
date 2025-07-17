@@ -1,0 +1,13 @@
+feature:
+  - src/**
+
+fix:
+  - src/**.go
+
+chore:
+  - .github/**
+  - resources/**
+
+docs:
+  - README.md
+  - docs/**
