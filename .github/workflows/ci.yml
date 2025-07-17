@@ -2,10 +2,9 @@ name: Build and Release SleepOnLAN
 
 on:
   push:
-    branches: [master, release/**, ci-testing]
+    branches: [master, ci-testing]
   pull_request:
-    branches: [master, release/**]
-  workflow_dispatch:
+    branches: [master]
 
 env:
   PACKAGE: sleep-on-lan
@@ -13,20 +12,9 @@ env:
   GO111MODULE: on
 
 jobs:
-  build:
-    name: 🏗️ Cross-platform Build
+  versioning:
+    name: 🔖 Determine Version Tag
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        goos: [linux, windows]
-        goarch: [amd64, 386, arm64, arm]
-        exclude:
-          - goos: windows
-            goarch: arm64
-          - goos: windows
-            goarch: arm
-
     outputs:
       version: ${{ steps.tagger.outputs.new_tag }}
 
@@ -42,16 +30,37 @@ jobs:
           default_bump: false
           default_prerelease_bump: false
 
-      - name: 🧠 Set version environment
-        run: echo "VERSION=${{ steps.tagger.outputs.new_tag }}" >> $GITHUB_ENV
+  build:
+    name: 🏗️ Cross-platform Build
+    runs-on: ubuntu-latest
+    needs: versioning
+
+    strategy:
+      matrix:
+        goos: [linux, windows]
+        goarch: [amd64, 386, arm64, arm]
+        exclude:
+          - goos: windows
+            goarch: arm64
+          - goos: windows
+            goarch: arm
+
+    env:
+      VERSION: ${{ needs.versioning.outputs.version }}
+      GOPATH: ${{ github.workspace }}
+      PACKAGE: sleep-on-lan
+      GO111MODULE: on
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
 
       - name: 🧠 Set release label
         run: |
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
             echo "VERSION_LABEL=RELEASE" >> $GITHUB_ENV
           else
             echo "VERSION_LABEL=SNAPSHOT" >> $GITHUB_ENV
-          fi
         env:
           GITHUB_REF: ${{ github.ref }}
 
@@ -81,13 +90,26 @@ jobs:
             -X 'main.BuildCompilationTimestamp=${BUILD_TIME}'"
           GOARCH=${{ matrix.goarch }} GOOS=${{ matrix.goos }} go install -a -tags netgo -installsuffix netgo -ldflags "${LDFLAGS}" $PACKAGE
 
-      - name: 📦 Copy binary
+      - name: 📦 Copy binary (validated)
         run: |
           BIN_DIR=bin/${{ matrix.goos }}_${{ matrix.goarch }}
           if [[ "${{ matrix.goos }}" == "windows" ]]; then
-            cp $GOPATH/bin/windows_${{ matrix.goarch }}/${PACKAGE}.exe $BIN_DIR/sol.exe
+            BIN_PATH="$GOPATH/bin/windows_${{ matrix.goarch }}/${PACKAGE}.exe"
+            if [[ -f "$BIN_PATH" ]]; then
+              cp "$BIN_PATH" "$BIN_DIR/sol.exe"
+            else
+              echo "❌ Binary not found: $BIN_PATH"
+              exit 1
+            fi
           else
-            cp $GOPATH/bin/${PACKAGE} $BIN_DIR/sol
+            BIN_PATH="$GOPATH/bin/${PACKAGE}"
+            if [[ -f "$BIN_PATH" ]]; then
+              cp "$BIN_PATH" "$BIN_DIR/sol"
+            else
+              echo "❌ Binary not found: $BIN_PATH"
+              exit 1
+            fi
+          fi
 
       - name: 📝 Copy configuration and scripts
         run: |
@@ -100,7 +122,18 @@ jobs:
       - name: 📚 Archive binaries
         run: |
           cd bin
-          zip -r -9 SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip ./${{ matrix.goos }}_${{ matrix.goarch }}/
+          ZIP_NAME="SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          zip -r -9 "$ZIP_NAME" "./${{ matrix.goos }}_${{ matrix.goarch }}/"
+
+      - name: ✅ Verify zip archive
+        run: |
+          ZIP_NAME="SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          if [[ -f "bin/$ZIP_NAME" ]]; then
+            echo "✅ Found zip archive: bin/$ZIP_NAME"
+          else
+            echo "❌ Missing zip archive: bin/$ZIP_NAME"
+            exit 1
+          fi
 
       - name: 📤 Upload distribution zip
         uses: actions/upload-artifact@v4
@@ -111,7 +144,8 @@ jobs:
   release:
     name: 🚀 Create GitHub Release
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, versioning]
+    if: needs.versioning.outputs.version != ''
 
     steps:
       - name: ⬇️ Checkout repository
@@ -125,11 +159,11 @@ jobs:
       - name: 🚀 Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.build.outputs.version }}
-          name: SleepOnLAN ${{ needs.build.outputs.version }}
+          tag_name: ${{ needs.versioning.outputs.version }}
+          name: SleepOnLAN ${{ needs.versioning.outputs.version }}
           body: |
             🎉 New version release of SleepOnLAN!
-            Version: `${{ needs.build.outputs.version }}`
+            Version: `${{ needs.versioning.outputs.version }}`
 
             Includes:
             - Cross-platform binaries for Linux and Windows
