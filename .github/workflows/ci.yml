@@ -81,20 +81,36 @@ jobs:
 
       - name: 🔧 Build binary
         run: |
-          cd src
           BUILD_TIME=$(date "+%FT%T%z")
           COMMIT=$(git rev-parse HEAD)
+          BIN_DIR="bin/${{ matrix.goos }}_${{ matrix.goarch }}"
+          OUTPUT="$BIN_DIR/sol"
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            OUTPUT="${OUTPUT}.exe"
+          fi
+
           LDFLAGS="-s -w \
             -X 'main.BuildCommit=${COMMIT}' \
             -X 'main.BuildVersion=${VERSION}' \
             -X 'main.BuildVersionLabel=${VERSION_LABEL}' \
             -X 'main.BuildCompilationTimestamp=${BUILD_TIME}'"
-          OUTPUT="../bin/${{ matrix.goos }}_${{ matrix.goarch }}/sol"
+
+          mkdir -p "$BIN_DIR"
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+            go build -tags netgo -ldflags "${LDFLAGS}" -o "$OUTPUT" ./src
+
+      - name: ✅ Verify binary exists
+        run: |
+          OUTPUT="bin/${{ matrix.goos }}_${{ matrix.goarch }}/sol"
           if [[ "${{ matrix.goos }}" == "windows" ]]; then
             OUTPUT="${OUTPUT}.exe"
           fi
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-            go build -tags netgo -ldflags "${LDFLAGS}" -o "$OUTPUT" $PACKAGE
+          if [[ -f "$OUTPUT" ]]; then
+            echo "✅ Binary exists: $OUTPUT"
+          else
+            echo "❌ Binary missing: $OUTPUT"
+            exit 1
+          fi
 
       - name: 📦 Copy binary (validated)
         run: |
