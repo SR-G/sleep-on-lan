@@ -1,0 +1,57 @@
+name-template: 'SleepOnLAN v$NEXT_PATCH_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
+template: |
+  ## What’s Changed
+
+  $CHANGES
+
+  ## Contributors
+
+  $CONTRIBUTORS
+
+change-template: '- $TITLE (#$NUMBER)'
+no-changes-template: ''
+
+version-resolver:
+  major:
+    labels: [breaking]
+  minor:
+    labels: [feature]
+  patch:
+    labels:
+      - fix
+      - chore
+      - docs
+      - test
+      - refactor
+      - perf
+      - optimization
+      - ci
+      - workflow
+      - github-actions
+      - security
+      - vulnerability
+      - dx
+      - tooling
+
+categories:
+  - title: 🚀 Features
+    labels: [feature]
+  - title: 🐛 Bug Fixes
+    labels: [fix]
+  - title: 📦 Maintenance
+    labels: [chore]
+  - title: 🧪 Tests
+    labels: [test]
+  - title: 🧹 Refactoring
+    labels: [refactor]
+  - title: 📖 Documentation
+    labels: [docs]
+  - title: ⚡️ Performance
+    labels: [perf, optimization]
+  - title: 🔧 CI/CD
+    labels: [ci, workflow, github-actions]
+  - title: 🔒 Security
+    labels: [security, vulnerability]
+  - title: 💡 Developer Experience
+    labels: [dx, tooling]

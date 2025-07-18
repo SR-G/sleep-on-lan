@@ -1,0 +1,12 @@
+name: 🧪 Lint Commit Messages
+
+on: [push, pull_request]
+
+jobs:
+  lint-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Commit Lint
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: .commitlintrc.json

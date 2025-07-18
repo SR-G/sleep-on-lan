@@ -1,0 +1,77 @@
+feature:
+  - paths:
+      - 'src/**/*'
+      - 'docs/features/**/*'
+      - '**/*.feature'
+
+fix:
+  - paths:
+      - 'src/**/*.go'
+      - '**/*.patch'
+
+chore:
+  - paths:
+      - '.github/**/*'
+      - 'resources/**/*'
+      - 'scripts/**/*'
+
+docs:
+  - paths:
+      - 'README.md'
+      - 'docs/**/*'
+
+test:
+  - paths:
+      - 'tests/**/*'
+      - '**/*_test.go'
+
+refactor:
+  - paths:
+      - 'src/**/*'
+      - '**/*.go'
+      - '**/internal/**/*'
+
+perf:
+  - paths:
+      - 'src/**/*.go'
+      - '**/*benchmark*'
+      - '**/perf/**/*'
+      - '**/optimization/**/*'
+
+ci:
+  - paths:
+      - '.github/workflows/**/*'
+      - '**/ci/**/*'
+      - '**/.env.example'
+
+workflow:
+  - paths:
+      - '.github/workflows/**/*'
+
+github-actions:
+  - paths:
+      - '.github/actions/**/*'
+
+security:
+  - paths:
+      - 'src/security/**/*'
+      - '**/*.key'
+      - '**/*.cert'
+      - '**/secrets/**/*'
+
+vulnerability:
+  - paths:
+      - 'src/security/**/*.go'
+      - '**/*.advisory'
+      - '**/*.patch'
+
+dx:
+  - paths:
+      - 'tools/**/*'
+      - '**/contrib/**/*'
+      - '**/developer/**/*'
+
+tooling:
+  - paths:
+      - 'scripts/**/*'
+      - 'tools/**/*'

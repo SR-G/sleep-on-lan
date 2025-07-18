@@ -1,0 +1,219 @@
+name: Build and Release SleepOnLAN
+
+on:
+  push:
+    branches: [master, ci-testing]
+  pull_request:
+    branches: [master]
+
+env:
+  PACKAGE: sleep-on-lan
+  GOPATH: ${{ github.workspace }}
+  GO111MODULE: on
+
+jobs:
+  versioning:
+    name: 🔖 Determine Version Tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tagger.outputs.new_tag }}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔖 Bump version and create tag
+        id: tagger
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch # Ensures a tag is always generated
+
+      - name: 🏷️ Push tag to GitHub
+        if: steps.tagger.outputs.new_tag != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.tagger.outputs.new_tag }}
+          git push origin ${{ steps.tagger.outputs.new_tag }}
+
+      - name: 🪵 Show new tag
+        run: |
+          echo "🔖 New version tag: ${{ steps.tagger.outputs.new_tag }}"
+
+  build:
+    name: 🏗️ Build on ${{ matrix.goos }} / ${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    needs: versioning
+
+    strategy:
+      matrix:
+        goos: [linux, windows]
+        goarch: [amd64, 386, arm64, arm]
+        exclude:
+          - goos: windows
+            goarch: arm64
+          - goos: windows
+            goarch: arm
+
+    env:
+      VERSION: ${{ needs.versioning.outputs.version }}
+      VERSION_LABEL: ${{ github.ref_name == 'master' && 'RELEASE' || 'SNAPSHOT' }}
+      PACKAGE: sleep-on-lan
+      GO111MODULE: on
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: 🧽 Go mod tidy
+        run: |
+          cd src
+          go mod tidy
+
+      - name: 🔧 Build binary
+        run: |
+          cd src
+          BUILD_TIME=$(date "+%FT%T%z")
+          COMMIT=$(git rev-parse HEAD)
+          BIN_DIR="../bin/${{ matrix.goos }}_${{ matrix.goarch }}"
+          OUTPUT="$BIN_DIR/sol"
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            OUTPUT="${OUTPUT}.exe"
+          fi
+
+          mkdir -p "$BIN_DIR"
+          LDFLAGS="-s -w \
+            -X 'main.BuildCommit=${COMMIT}' \
+            -X 'main.BuildVersion=${VERSION}' \
+            -X 'main.BuildVersionLabel=${VERSION_LABEL}' \
+            -X 'main.BuildCompilationTimestamp=${BUILD_TIME}'"
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+            go build -tags netgo -ldflags "${LDFLAGS}" -o "$OUTPUT" .
+
+      - name: ✅ Verify binary exists
+        run: |
+          OUTPUT="bin/${{ matrix.goos }}_${{ matrix.goarch }}/sol"
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            OUTPUT="${OUTPUT}.exe"
+          fi
+          if [[ -f "$OUTPUT" ]]; then
+            echo "✅ Binary exists: $OUTPUT"
+          else
+            echo "❌ Missing binary: $OUTPUT"
+            exit 1
+          fi
+
+      - name: 📝 Copy configuration and scripts
+        run: |
+          TARGET="bin/${{ matrix.goos }}_${{ matrix.goarch }}"
+          CONFIG="resources/configuration/default/sol-basic-configuration.json"
+
+          if [[ -f "$CONFIG" ]]; then
+            cp "$CONFIG" "$TARGET/sol.json"
+          else
+            echo "❌ Missing configuration file: $CONFIG"
+            exit 1
+          fi
+
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            cp resources/script/*.bat "$TARGET/" || echo "⚠️ No batch scripts found."
+          fi
+
+      - name: 📚 Archive binaries
+        run: |
+          cd bin
+          ZIP="SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          zip -r -9 "$ZIP" "./${{ matrix.goos }}_${{ matrix.goarch }}/"
+
+      - name: ✅ Verify zip archive
+        run: |
+          ZIP="bin/SleepOnLAN-${VERSION}-${VERSION_LABEL}-${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          if [[ -f "$ZIP" ]]; then
+            echo "✅ Found zip archive: $ZIP"
+          else
+            echo "❌ Missing zip: $ZIP"
+            exit 1
+          fi
+
+      - name: 📤 Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sleeponlan-builds-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: bin/SleepOnLAN-${{ env.VERSION }}-${{ env.VERSION_LABEL }}-${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          if-no-files-found: warn
+
+  release-drafter:
+    name: 📝 Update Release Draft
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    name: 🚀 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build, versioning]
+    if: |
+      startsWith(github.ref, 'refs/heads/master') ||
+      startsWith(github.ref, 'refs/heads/release/') ||
+      startsWith(github.ref, 'refs/heads/nightly') ||
+      github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: ⬇️ Checkout repository at tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.versioning.outputs.version }}
+
+      - name: 📥 Download all build artifacts (flattened)
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: 🔒 Generate SHA256 checksums
+        run: |
+          mkdir -p dist
+          find dist -name '*.zip' -exec sha256sum {} \; > dist/checksums.txt
+          echo "✅ SHA256 checksums written to dist/checksums.txt"
+
+      - name: 📋 Fetch release notes from draft
+        id: get_release_notes
+        run: |
+          echo "Fetching draft release notes..."
+          DRAFT_RELEASE=$(gh release list --limit 1 --repo $GITHUB_REPOSITORY --json tagName,draft | jq -r '.[] | select(.draft==true) | .tagName')
+          if [ -z "$DRAFT_RELEASE" ]; then
+            echo "No draft release found"
+            echo "::set-output name=body::"
+          else
+            RELEASE_BODY=$(gh release view "$DRAFT_RELEASE" --repo $GITHUB_REPOSITORY --json body --jq '.body')
+            echo "::set-output name=body::$RELEASE_BODY"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.versioning.outputs.version }}
+          name: SleepOnLAN ${{ needs.versioning.outputs.version }}
+          body: ${{ steps.get_release_notes.outputs.body }}
+          prerelease: ${{ startsWith(github.ref, 'refs/heads/nightly') || github.event_name == 'workflow_dispatch' }}
+          files: dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

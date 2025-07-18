@@ -1,0 +1,50 @@
+name: 🤖 Pull Request Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  label:
+    name: 🏷️ Apply PR Labels
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🧠 Label PR based on file changes
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+      - name: 🔍 Diagnostic - Show label matches
+        run: |
+          echo "🧪 Checking file label matches..."
+          BASE="${{ github.event.pull_request.base.ref }}"
+          git fetch origin "$BASE"
+          CHANGED_FILES=$(git diff --name-only origin/"$BASE")
+
+          for FILE in $CHANGED_FILES; do
+            echo "🔍 $FILE"
+            MATCHES=""
+
+            [[ "$FILE" == src/* || "$FILE" == docs/features/* || "$FILE" == *.feature ]] && MATCHES="${MATCHES} feature"
+            [[ "$FILE" == *.go || "$FILE" == *.patch ]] && MATCHES="${MATCHES} fix"
+            [[ "$FILE" == .github/* || "$FILE" == resources/* || "$FILE" == scripts/* ]] && MATCHES="${MATCHES} chore"
+            [[ "$FILE" == README.md || "$FILE" == docs/* ]] && MATCHES="${MATCHES} docs"
+            [[ "$FILE" == tests/* || "$FILE" == *_test.go ]] && MATCHES="${MATCHES} test"
+            [[ "$FILE" == internal/* || "$FILE" == *benchmark* || "$FILE" == */perf/* || "$FILE" == */optimization/* ]] && MATCHES="${MATCHES} perf"
+            [[ "$FILE" == .github/workflows/* || "$FILE" == */ci/* || "$FILE" == .env.example ]] && MATCHES="${MATCHES} ci"
+            [[ "$FILE" == .github/actions/* ]] && MATCHES="${MATCHES} github-actions"
+            [[ "$FILE" == */security/* || "$FILE" == *.key || "$FILE" == *.cert || "$FILE" == */secrets/* ]] && MATCHES="${MATCHES} security"
+            [[ "$FILE" == */contrib/* || "$FILE" == */developer/* || "$FILE" == tools/* ]] && MATCHES="${MATCHES} dx tooling"
+
+            if [[ -n "$MATCHES" ]]; then
+              echo "   🏷️ Matched labels:$MATCHES"
+            else
+              echo "   ⚠️ No label matches found"
+            fi
+          done
