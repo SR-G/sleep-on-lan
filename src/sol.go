@@ -77,7 +77,7 @@ func executeCommandGenerateConfiguration() {
 
 	b, err := json.MarshalIndent(c, "", "    ")
 	if err != nil {
-		logger.Errorf("Can't create JSON content for default content", err)
+		logger.Errorf("Can't create JSON content for default content : %v", err)
 	} else {
 		// Check which configuration file to use (either from --config, either sol.json file alongside the binary, either default values)
 		if configurationFileNameFromCommandLine == "" {
@@ -93,14 +93,14 @@ func executeCommandGenerateConfiguration() {
 
 				file, err := os.OpenFile(configurationFileNameFromCommandLine, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 				if err != nil {
-					logger.Errorf("Can't write file ["+colorer.Red(configurationFileNameFromCommandLine)+"]", err)
+					logger.Errorf("Can't write file ["+colorer.Red(configurationFileNameFromCommandLine)+"] : %v", err)
 				}
 				defer file.Close()
 
 				// Create blank configuration (with default values) and write bytes to file
 				bytesWritten, err := file.Write(b)
 				if err != nil {
-					logger.Errorf("Can't write JSON content into ["+colorer.Red(configurationFileNameFromCommandLine)+"]", err)
+					logger.Errorf("Can't write JSON content into ["+colorer.Red(configurationFileNameFromCommandLine)+"] : %v", err)
 				} else {
 					logger.Infof("Bytes written : " + strconv.Itoa(bytesWritten))
 				}
