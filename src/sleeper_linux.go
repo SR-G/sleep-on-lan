@@ -35,7 +35,7 @@ func sleepCommandLineImplementation(cmd string) {
 	logger.Infof("Sleep implementation [linux], sleep command is [" + cmd + "]")
 	_, output, err := Execute(cmd)
 	if err != nil {
-		logger.Errorf("Can't execute command ["+cmd+"], output is : "+output+", error is : ", err)
+		logger.Errorf("Can't execute command ["+cmd+"], output is : "+output+", error is : %v", err)
 	} else {
 		logger.Infof("Command correctly executed")
 	}

@@ -17,16 +17,16 @@ func ListenUDP(port int) {
 	var buf [1024]byte
 	addr, err := net.ResolveUDPAddr("udp", ":"+strconv.Itoa(port))
 	if err != nil {
-		logger.Errorf("Error while resolving local address :", err.Error())
+		logger.Errorf("Error while resolving local address : %v", err.Error())
 	}
 	sock, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		if configuration.ExitIfAnyPortIsAlreadyUsed {
-			logger.Errorf("Error while starting listening (will exit, per configuration) :", colorer.Red(err.Error()))
+			logger.Errorf("Error while starting listening (will exit, per configuration) : %v", colorer.Red(err.Error()))
 			exit <- true
 			return
 		} else {
-			logger.Errorf("Error while starting listening (program will however continue) :", colorer.Red(err.Error()))
+			logger.Errorf("Error while starting listening (program will however continue) : %v", colorer.Red(err.Error()))
 		}
 	} else {
 		for {

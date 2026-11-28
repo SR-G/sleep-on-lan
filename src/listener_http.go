@@ -286,7 +286,7 @@ func ListenHTTP(port int) {
 		logger.Infof("Now sending wol magic packet to MAC address [" + mac + "]")
 		magicPacket, err := EncodeMagicPacket(mac)
 		if err != nil {
-			logger.Errorf("Error while sending magic packet to MAC address ["+mac+"]", err)
+			logger.Errorf("Error while sending magic packet to MAC address ["+mac+"] : %v", err)
 		} else {
 			magicPacket.Wake(configuration.BroadcastIP)
 		}
