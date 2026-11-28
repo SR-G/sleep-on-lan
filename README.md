@@ -177,7 +177,34 @@ Example 3 : default operation will put the computer to sleep on linux and a seco
 
 ### Under windows
 
-The Sleep-On-Lan process may be run manually or, for convenience, installed as a service. The easiest way to install the Sleep-On-Lan service is probably to use [NSSM](https://nssm.cc/) (the Non-Sucking Service Manager). To be executed as admin (Right click on the .cmd file that you created > Execute as administrator).
+The Sleep-On-Lan process may be run manually or, for convenience, started automatically in the background, either with the built-in Task Scheduler or as a service through NSSM.
+
+#### With the Task Scheduler (no extra tool)
+
+1. Move the `windows_amd64` folder where you want to keep it, e.g. `C:\Tools\SleepOnLan`.
+2. Run `sol.exe` once by hand, allow it through the Windows firewall when prompted, then close it.
+3. Open PowerShell as administrator (type `powershell` in the Start menu, then press `Ctrl+Shift+Enter`).
+4. Run (adjust the path):
+
+<pre>$exe = 'C:\Tools\SleepOnLan\sol.exe'
+$action = New-ScheduledTaskAction -Execute $exe -WorkingDirectory (Split-Path $exe)
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) `
+    -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) `
+    -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+Register-ScheduledTask -TaskName 'SleepOnLan' -Action $action -Trigger $trigger `
+    -Settings $settings -User 'SYSTEM' -RunLevel Highest
+Start-ScheduledTask -TaskName 'SleepOnLan'
+</pre>
+
+Removal :
+
+<pre>Unregister-ScheduledTask -TaskName 'SleepOnLan' -Confirm:$false
+</pre>
+
+#### With NSSM
+
+The Sleep-On-Lan process may also be installed as a service with [NSSM](https://nssm.cc/) (the Non-Sucking Service Manager). To be executed as admin (Right click on the .cmd file that you created > Execute as administrator).
 
 Usage :
 
